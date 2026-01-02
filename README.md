@@ -19,7 +19,8 @@ El proyecto combina:
 ---
 
 ## 📂 Estructura del proyecto
-![Estructura del proyecto](estructura-proyecto.png)
+![Estructura del proyecto](assets/estructura-proyecto.png)
+
 ## 🔎 Explicación:
 - be/ → Todo el backend en Spring Boot (controladores, DTOs, vistas Thymeleaf, configuración).
   - ds/ → Todo lo relacionado con el modelo de ML (dataset, notebooks, scripts, modelo exportado).
