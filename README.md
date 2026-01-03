@@ -111,7 +111,7 @@ mvnd spring-boot:run
 
 **El servidor se levanta en:**
 
-http://localhost:8080/form
+http://localhost:8080
 
 **📑 Endpoints**
 **REST API**
