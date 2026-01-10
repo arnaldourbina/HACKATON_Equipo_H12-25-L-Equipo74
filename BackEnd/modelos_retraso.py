@@ -9,14 +9,15 @@ from catboost import CatBoostClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, classification_report
 from joblib import dump, load
+import os
 
 # ---------------------------
 # 1. Entrenamiento de modelos
 # ---------------------------
 def entrenar_modelos(datos):
-    # Preparación de datos
-    X = datos[['RETRASO_AVIÓN_TARDÍO','RETRASO_AEROLÍNEA',
-               'RETRASO_SISTEMA_AÉREO','RETRASO_CLIMA']]
+    # Preparacion de datos
+    X = datos[['RETRASO_AVION_TARDIO','RETRASO_AEROLINEA',
+               'RETRASO_SISTEMA_AEREO','RETRASO_CLIMA']]
     y = datos['RETRASO_GRAVE']
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -26,7 +27,6 @@ def entrenar_modelos(datos):
     # Entrenamiento XGBoost
     xgb = XGBClassifier(scale_pos_weight=8.1,
                         eval_metric="logloss",
-                        use_label_encoder=False,
                         random_state=42)
     xgb.fit(X_train, y_train)
 
@@ -44,22 +44,25 @@ def entrenar_modelos(datos):
     proba_cat = cat.predict_proba(X_test)[:,1]
     proba_ensemble = (proba_xgb + proba_cat) / 2
 
-    # Evaluación
+    # Evaluacion
     y_pred_final = (proba_ensemble >= 0.6).astype(int)
     cm = confusion_matrix(y_test, y_pred_final)
 
     print("Reporte final con umbral 0.6:")
     print(classification_report(y_test, y_pred_final))
 
-    # Visualización
-    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
-    plt.xlabel("Predicción")
-    plt.ylabel("Real")
-    plt.show()
+    # Crear carpeta ds/model si no existe
+    os.makedirs("ds/model", exist_ok=True)
 
-    # Guardar modelos
-    dump(xgb, "model/xgb_model.joblib")
-    dump(cat, "model/cat_model.joblib")
+    # Visualizacion
+    sns.heatmap(cm, annot=True, fmt="d", cmap="Blues")
+    plt.xlabel("Prediccion")
+    plt.ylabel("Real")
+    plt.savefig("ds/model/confusion_matrix.png")
+
+    # Guardar modelos en ds/model
+    dump(xgb, "ds/model/xgb_model.joblib")
+    dump(cat, "ds/model/cat_model.joblib")
 
     return xgb, cat
 
@@ -70,7 +73,7 @@ def cargar_modelo(ruta):
     return load(ruta)
 
 # ---------------------------
-# 3. Predicción con nuevos datos
+# 3. Prediccion con nuevos datos
 # ---------------------------
 def predecir_retraso(modelo, nuevo_dato):
     return modelo.predict(nuevo_dato)
