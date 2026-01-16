@@ -109,20 +109,29 @@ pip install -r requirements.txt
 
 **2. Entrenar el modelo**
 
+```bash
 python modelos_retraso.py
+````
 
 **Esto genera el archivo:**
 
+```bash
 model/flight_delay_model.joblib
+````
 
 **3. Ejecutar el backend**
 
+```bash
 cd be
 mvnd spring-boot:run
+````
 
 **El servidor se levanta en:**
 
+```bash
 http://127.0.0.1:5000/docs
+mvnd spring-boot:run
+````
 
 **📑 Endpoints**
 
