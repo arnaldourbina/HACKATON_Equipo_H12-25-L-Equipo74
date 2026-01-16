@@ -47,3 +47,34 @@ out/
 # IDEs
 .vscode/
 .idea/
+
+# --- Python ---
+venv310/
+__pycache__/
+.ipynb_checkpoints/
+*.pyd
+*.dll
+*.so
+*.dylib
+*.log
+*.tmp
+
+# --- Java ---
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+target/
+build/
+.gradle/
+out/
+
+# --- IDEs ---
+.vscode/
+.idea/
+
+# --- Datos grandes (si no usas LFS) ---
+*.csv
+*.parquet
+*.xlsx
