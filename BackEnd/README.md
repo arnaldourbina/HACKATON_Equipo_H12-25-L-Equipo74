@@ -115,9 +115,7 @@ python modelos_retraso.py
 
 **Esto genera el archivo:**
 
-```bash
 model/flight_delay_model.joblib
-````
 
 **3. Ejecutar el backend**
 
