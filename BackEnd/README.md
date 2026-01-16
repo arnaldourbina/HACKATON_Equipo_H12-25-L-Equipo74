@@ -100,10 +100,11 @@ Prediccion-de-Retrasos-de-Vuelos/
 ## 🚀 Cómo ejecutar
 
 ### 1. Entrenar el modelo en Python
+
 ```bash
 cd ds
 pip install -r requirements.txt
-
+``
 **2. Entrenar el modelo
 python modelos_retraso.py
 
