@@ -168,12 +168,13 @@ mvnd spring-boot:run
 **📊 Modelo de Machine Learning**
 **- Features utilizadas:**
 
-> - Aerolínea
-> - Origen
-> - Destino
-> - Hora de partida
-> - Día de la semana
-> - Distancia (km)
+  > - Aerolínea
+  > - Origen
+  > - Destino
+  > - Hora de partida
+  > - Día de la semana
+  > - Distancia (km)
+
 **- Target:** retrasado (0 puntual, 1 retrasado)
 **- Algoritmo:** Logistic Regression con OneHotEncoder para variables categóricas.
 **- Métricas:** Accuracy, Precision, Recall, F1.
