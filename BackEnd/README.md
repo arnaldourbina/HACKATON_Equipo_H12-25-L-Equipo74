@@ -2,7 +2,8 @@
 # ✈️ FlightOnTime API
 
 ## 📌 Descripción
-FlightOnTime es una aplicación que permite **predecir retrasos de vuelos** a partir de datos como aerolínea, origen, destino, fecha de partida y distancia.  
+FlightOnTime es una aplicación que permite **predecir retrasos de vuelos** a partir de datos como aerolínea, origen, destino, fecha de partida y distancia.
+
 El proyecto combina:
 - **Backend en Spring Boot** para exponer endpoints REST y formularios web con Thymeleaf.
 - **Modelo de Machine Learning en Python (scikit-learn)** entrenado con datos históricos de vuelos.
@@ -106,13 +107,16 @@ cd ds
 pip install -r requirements.txt
 ````
 
-**2. Entrenar el modelo
+**2. Entrenar el modelo**
+
 python modelos_retraso.py
 
 **Esto genera el archivo:**
+
 model/flight_delay_model.joblib
 
 **3. Ejecutar el backend**
+
 cd be
 mvnd spring-boot:run
 
