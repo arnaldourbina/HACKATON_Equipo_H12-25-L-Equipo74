@@ -27,7 +27,7 @@ Prediccion-de-Retrasos-de-Vuelos/
 │   │   ├── main/
 │   │   │   ├── java/com/flightontime/
 │   │   │   │   ├── controller/
-│   │   │   │   │   ├── HelloController.java
+│   │   │   │   │   ├── @RestController.java
 │   │   │   │   │   ├── PredictController.java
 │   │   │   │   │   ├── StatsController.java
 │   │   │   │   │   └── WebController.java
@@ -49,7 +49,7 @@ Prediccion-de-Retrasos-de-Vuelos/
 │       │   ├── application.yml
 │       │   ├── com/flightontime/
 │       │   │   ├── controller/
-│       │   │   │   ├── HelloController.class
+|       |   |   |   |__ @RestController.class 
 │       │   │   │   ├── PredictController.class
 │       │   │   │   ├── StatsController.class
 │       │   │   │   └── WebController.class
