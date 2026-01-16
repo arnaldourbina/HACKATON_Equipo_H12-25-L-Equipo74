@@ -2,7 +2,7 @@
 # ✈️ FlightOnTime API
 
 ## 📌 Descripción
-FlightOnTime es una aplicación que permite **predecir retrasos de vuelos** a partir de datos como aerolínea, número de vuelo, origen, destino, fecha de partida y distancia.  
+FlightOnTime es una aplicación que permite **predecir retrasos de vuelos** a partir de datos como aerolínea, origen, destino, fecha de partida y distancia.  
 El proyecto combina:
 - **Backend en Spring Boot** para exponer endpoints REST y formularios web con Thymeleaf.
 - **Modelo de Machine Learning en Python (scikit-learn)** entrenado con datos históricos de vuelos.
@@ -13,10 +13,12 @@ El proyecto combina:
 - **Java 17** + **Spring Boot 3.3.1**
 - **Thymeleaf** para vistas HTML
 - **Maven** para gestión de dependencias
-- **Python 3.x** + **scikit-learn**, **pandas**, **numpy**
+- **Python 3.x** + **scikit-learn**, **pandas**, **numpy**, **catboost**
 - **Joblib** para exportar el modelo entrenado
+- **Git LFS** para manejar datasets grandes
 
 ---
+
 
 ## 📂 Estructura del proyecto
 ````
@@ -98,20 +100,23 @@ Prediccion-de-Retrasos-de-Vuelos/
 ## 🚀 Cómo ejecutar
 
 ### 1. Entrenar el modelo en Python
-``bash
+```bash
 cd ds
-python train_model.py
+pip install -r requirements.txt
+
+**2. Entrenar el modelo
+python modelos_retraso.py
 
 **Esto genera el archivo:**
 model/flight_delay_model.joblib
 
-**2. Ejecutar el backend**
+**3. Ejecutar el backend**
 cd be
 mvnd spring-boot:run
 
 **El servidor se levanta en:**
 
-http://localhost:8080
+http://127.0.0.1:5000/docs
 
 **📑 Endpoints**
 **REST API**
@@ -120,22 +125,23 @@ Recibe un JSON con los datos del vuelo y devuelve la predicción.
 
 {
   "aerolinea": "LATAM",
-  "numeroVuelo": "LA123",
   "origen": "SCL",
   "destino": "JFK",
   "fecha_partida": "2026-01-10T15:00:00",
   "distancia_km": 8200
 }
+
 - Respuesta:
 {
-  "aerolinea": "LATAM",
-  "numeroVuelo": "LA123",
-  "origen": "SCL",
-  "destino": "JFK",
-  "fecha_partida": "2026-01-10T15:00:00",
-  "distancia_km": 8200,
-  "delayMinutes": 30,
-  "status": "Predicted delay"
+  "prevision": "Retrasado",
+  "probabilidad": 0.821,
+  "features": {
+    "aerolinea": "LATAM",
+    "origen": "SCL",
+    "destino": "JFK",
+    "distancia_km": 8200,
+    "dia_semana": 6
+  }
 }
 
 **Interfaz Web**
@@ -144,15 +150,22 @@ Recibe un JSON con los datos del vuelo y devuelve la predicción.
 
 **📊 Modelo de Machine Learning**
 **- Features utilizadas:**
-- Aerolínea
-- Origen
-- Destino
-- Hora de partida
-- Día de la semana
-- Distancia (km)
-- Target: retrasado (0 puntual, 1 retrasado)
-- Algoritmo: Logistic Regression con OneHotEncoder para variables categóricas.
-- Métricas: Accuracy, Precision, Recall, F1.
+> - Aerolínea
+> - Origen
+> - Destino
+> - Hora de partida
+> - Día de la semana
+> - Distancia (km)
+**- Target:** retrasado (0 puntual, 1 retrasado)
+**- Algoritmo:** Logistic Regression con OneHotEncoder para variables categóricas.
+**- Métricas:** Accuracy, Precision, Recall, F1.
+
+**⚠️ Notas**
+- Los datasets grandes están versionados con Git LFS.
+Asegúrate de ejecutar:
+
+git lfs install
+git lfs pull
 
 **🤝 Contribución**
 - Haz un fork del repositorio.
@@ -168,3 +181,8 @@ Recibe un JSON con los datos del vuelo y devuelve la predicción.
 
 **📜 Licencia**
 Este proyecto se distribuye bajo la licencia MIT.
+
+
+
+
+
