@@ -100,7 +100,7 @@ Prediccion-de-Retrasos-de-Vuelos/
 
 ## 🚀 Cómo ejecutar
 
-### 1. Entrenar el modelo en Python
+**1. Entrenar el modelo en Python**
 
 ```bash
 cd ds
