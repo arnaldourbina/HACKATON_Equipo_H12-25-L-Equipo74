@@ -1,0 +1,19 @@
+# Entornos virtuales
+venv310/
+__pycache__/
+.ipynb_checkpoints/
+
+# Binarios y librerías
+*.pyd
+*.dll
+*.so
+*.dylib
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Datos grandes (si no usas LFS)
+*.csv
+*.parquet
+*.xlsx

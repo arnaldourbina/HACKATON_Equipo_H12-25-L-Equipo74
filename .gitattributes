@@ -1,2 +1,9 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
 *.joblib filter=lfs diff=lfs merge=lfs -text
+
+*.joblib filter=lfs diff=lfs merge=lfs
+*.pkl filter=lfs diff=lfs merge=lfs
+*.h5 filter=lfs diff=lfs merge=lfs
+*.csv filter=lfs diff=lfs merge=lfs
+*.parquet filter=lfs diff=lfs merge=lfs
+*.xlsx filter=lfs diff=lfs merge=lfs
