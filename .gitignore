@@ -17,3 +17,33 @@ __pycache__/
 *.csv
 *.parquet
 *.xlsx
+
+# Entornos virtuales y Python
+venv310/
+__pycache__/
+.ipynb_checkpoints/
+
+# Binarios y librerías compiladas
+*.pyd
+*.dll
+*.so
+*.dylib
+
+# Archivos temporales
+*.log
+*.tmp
+
+# Java: compilados y dependencias
+*.class
+*.jar
+*.war
+*.ear
+*.iml
+target/
+build/
+.gradle/
+out/
+
+# IDEs
+.vscode/
+.idea/
