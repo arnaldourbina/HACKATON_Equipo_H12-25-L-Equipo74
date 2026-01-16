@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Resultado</title>
+</head>
+<body>
+    <h1>Resultado de la predicción 🚀</h1>
+    <p>Aerolínea: <span th:text="${prediction.aerolinea}"></span></p>
+    <p>Número de vuelo: <span th:text="${prediction.numeroVuelo}"></span></p>
+    <p>Origen: <span th:text="${prediction.origen}"></span></p>
+    <p>Destino: <span th:text="${prediction.destino}"></span></p>
+    <p>Fecha partida: <span th:text="${prediction.fecha_partida}"></span></p>
+    <p>Distancia: <span th:text="${prediction.distancia_km}"></span> km</p>
+    <p>Retraso estimado: <span th:text="${prediction.delayMinutes}"></span> minutos</p>
+    <p>Status: <span th:text="${prediction.status}"></span></p>
+</body>
+</html>

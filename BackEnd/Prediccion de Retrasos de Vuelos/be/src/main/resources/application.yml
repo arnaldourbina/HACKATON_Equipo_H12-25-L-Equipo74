@@ -1,0 +1,6 @@
+# be/src/main/resources/application.yml
+server:
+  port: 8080
+
+ds:
+  baseUrl: http://localhost:8001
