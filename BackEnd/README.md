@@ -110,7 +110,7 @@ pip install -r requirements.txt
 **2. Entrenar el modelo**
 
 ```bash
-python modelos_retraso.py
+python entrenar.py
 ````
 
 **Esto genera el archivo:**
