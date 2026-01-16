@@ -125,9 +125,11 @@ mvnd spring-boot:run
 http://127.0.0.1:5000/docs
 
 **📑 Endpoints**
+
 **REST API**
 **- POST /predict**
-Recibe un JSON con los datos del vuelo y devuelve la predicción.
+
+**Recibe un JSON con los datos del vuelo y devuelve la predicción.**
 
 {
   "aerolinea": "LATAM",
@@ -137,7 +139,8 @@ Recibe un JSON con los datos del vuelo y devuelve la predicción.
   "distancia_km": 8200
 }
 
-- Respuesta:
+**- Respuesta:**
+
 {
   "prevision": "Retrasado",
   "probabilidad": 0.821,
@@ -151,11 +154,13 @@ Recibe un JSON con los datos del vuelo y devuelve la predicción.
 }
 
 **Interfaz Web**
+
 - GET /form → muestra formulario HTML.
 - POST /form → procesa datos y muestra resultado en result.html.
 
 **📊 Modelo de Machine Learning**
 **- Features utilizadas:**
+
 > - Aerolínea
 > - Origen
 > - Destino
@@ -167,6 +172,7 @@ Recibe un JSON con los datos del vuelo y devuelve la predicción.
 **- Métricas:** Accuracy, Precision, Recall, F1.
 
 **⚠️ Notas**
+
 - Los datasets grandes están versionados con Git LFS.
 Asegúrate de ejecutar:
 
@@ -174,6 +180,7 @@ git lfs install
 git lfs pull
 
 **🤝 Contribución**
+
 - Haz un fork del repositorio.
 - Crea una rama (feature/nueva-funcionalidad).
 - Haz commit de tus cambios.
