@@ -176,7 +176,9 @@ mvnd spring-boot:run
   > - Distancia (km)
 
 **- Target:** retrasado (0 puntual, 1 retrasado)
+
 **- Algoritmo:** Logistic Regression con OneHotEncoder para variables categóricas.
+
 **- Métricas:** Accuracy, Precision, Recall, F1.
 
 **⚠️ Notas**
