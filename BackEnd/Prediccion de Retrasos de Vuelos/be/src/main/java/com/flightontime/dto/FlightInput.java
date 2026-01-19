@@ -1,48 +1,38 @@
 package com.flightontime.dto;
 
-import jakarta.validation.constraints.*;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 public class FlightInput {
-    @NotBlank 
-    private String aerolinea;
+    @NotBlank(message = "Aerolinea requerida")
+    @JsonProperty("aerolinea")
+    public String aerolinea;
 
-    @NotBlank 
-    private String numeroVuelo;
+    @NotBlank(message = "Origen requerido")
+    @JsonProperty("origen")
+    public String origen;
 
-    @NotBlank 
-    @Size(min=3, max=4) 
-    private String origen;
+    @NotBlank(message = "Destino requerido")
+    @JsonProperty("destino")
+    public String destino;
 
-    @NotBlank 
-    @Size(min=3, max=4) 
-    private String destino;
+    @NotNull(message = "Fecha partida requerida")
+    @JsonProperty("fecha_partida")
+    public String fecha_partida;
 
-    @NotBlank
-    @JsonProperty("fecha_partida") // mantiene compatibilidad con el JSON
-    private LocalDateTime fechaPartida;
+    @NotNull(message = "Distancia requerida")
+    @JsonProperty("distancia_km")
+    public Integer distancia_km;
 
-    @Positive
-    @JsonProperty("distancia_km") // mantiene compatibilidad con el JSON
-    private double distanciaKm;
+    @Override
+    public String toString() {
+        return String.format(
+                "FlightInput{aerolinea='%s', origen='%s', destino='%s', fecha_partida=%s, distancia_km=%d}",
+                aerolinea, origen, destino, fecha_partida, distancia_km);
+    }
 
-    // Getters y setters
-    public String getAerolinea() { return aerolinea; }
-    public void setAerolinea(String aerolinea) { this.aerolinea = aerolinea; }
+    public FlightInput() {
+    }
 
-    public String getNumeroVuelo() { return numeroVuelo; }
-    public void setNumeroVuelo(String numeroVuelo) { this.numeroVuelo = numeroVuelo; }
-
-    public String getOrigen() { return origen; }
-    public void setOrigen(String origen) { this.origen = origen; }
-
-    public String getDestino() { return destino; }
-    public void setDestino(String destino) { this.destino = destino; }
-
-    public LocalDateTime getFechaPartida() { return fechaPartida; }
-    public void setFechaPartida(LocalDateTime fechaPartida) { this.fechaPartida = fechaPartida; }
-
-    public double getDistanciaKm() { return distanciaKm; }
-    public void setDistanciaKm(double distanciaKm) { this.distanciaKm = distanciaKm; }
 }

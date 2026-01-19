@@ -1,27 +1,22 @@
-@PostMapping
-public PredictionOutput predict(@Valid @RequestBody FlightInput input) {
-    RestTemplate restTemplate = new RestTemplate();
+package com.flightontime.controller;
 
-    // Llamada al microservicio Python
-    ResponseEntity<Map> response = restTemplate.postForEntity(
-        "http://localhost:5000/predict", input, Map.class);
+import com.flightontime.dto.FlightInput;
+import com.flightontime.dto.PredictionOutput;
+import com.flightontime.service.DsClientService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
-    Map<String, Object> result = response.getBody();
+@RestController
+@RequestMapping("/api")
+public class PredictController {
+    @Autowired
+    private DsClientService dsClient;
 
-    PredictionOutput output = new PredictionOutput();
-    output.setAerolinea(input.getAerolinea());
-    output.setNumeroVuelo(input.getNumeroVuelo());
-    output.setOrigen(input.getOrigen());
-    output.setDestino(input.getDestino());
-    output.setFechaPartida(input.getFechaPartida().toString());
-    output.setDistanciaKm(input.getDistanciaKm());
-
-    // Valores devueltos por Python
-    int delayMinutes = (Integer) result.get("delayMinutes");
-    String status = (String) result.get("status");
-
-    output.setDelayMinutes(delayMinutes);
-    output.setStatus(status);
-
-    return output;
+    @PostMapping("/predict")
+    public ResponseEntity<PredictionOutput> predict(@Valid @RequestBody FlightInput input) {
+        PredictionOutput result = dsClient.predict(input);
+        return ResponseEntity.ok(result);
+    }
 }

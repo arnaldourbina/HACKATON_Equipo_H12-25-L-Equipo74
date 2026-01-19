@@ -35,4 +35,4 @@ umbral = 0.7912
 prevision = "Retrasado" if proba >= umbral else "Puntual"
 
 print("Previsión:", prevision)
-print("Probabilidad:", round(float(proba), 3))
+print("Probabilidad:", round(float(proba), 2))

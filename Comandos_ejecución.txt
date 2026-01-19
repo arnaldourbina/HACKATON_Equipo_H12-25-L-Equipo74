@@ -1,0 +1,27 @@
+===============================================================================================
+                                        DataScience
+todos los comandos de FastAPI, modelos. etc, son ejecutados en el directorio ds en su mayoria.
+
+.\venv\Scripts\activate -> Activa el entorno de ds (navegar hasta el directorio ds)
+(en directorio ds) python app/main.py -> Corre uvicorn para la ejecución de FastAPI.
+===============================================================================================
+
+
+===============================================================================================
+                                            JAVA    
+Todos los comandos de JAVA, son ejecutados en su mayoria en el directorio be.
+
+mvn clean compile -> para compilar el proyecto en busca de errores.
+mvn spring-boot:run -> Corre Maven para la ejecución de la API REST de JAVA.
+===============================================================================================
+
+===============================================================================================
+
+Si el proyecto fue descargado. En caso de que exista, borrar la carpeta venv que se encuentra
+dentro de ds, y crear la suya propia en su pc. con el comando;
+
+python -m venv nombre_del_entorno (en este caso venv, pero puede ser venv3.12 <- version de python instalada. u otro nombre que tú quieras.)
+
+===============================================================================================
+
+Se creará un documento requeriments.txt con todas las dependencias necesarias para ejecutar el proyecto.
