@@ -77,7 +77,7 @@ def predict(flight: FlightInput):
     proba = model.predict_proba(df)[:, 1][0]
 
     # Usa el umbral fijo optimo = 0.7912
-    umbral = 0.7912
+    umbral = 0.3012  # 0.7912
     prevision = "Retrasado" if proba >= umbral else "Puntual"
 
     return {

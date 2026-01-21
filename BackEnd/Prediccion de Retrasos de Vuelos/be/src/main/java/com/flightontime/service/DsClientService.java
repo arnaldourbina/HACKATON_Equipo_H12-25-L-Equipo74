@@ -19,11 +19,11 @@ public class DsClientService {
             @Value("${ds.service.url:http://localhost:5000/predict}") String dsUrl) {
         this.restTemplate = restTemplate;
         this.dsUrl = dsUrl;
-        System.out.println("🚀 DS URL configurada: " + dsUrl);
+        System.out.println("DS URL configurada: " + dsUrl);
     }
 
     public PredictionOutput predict(FlightInput input) {
-        System.out.println("📤 Enviando a DS: " + input);
+        System.out.println("nviando a DS: " + input);
         try {
 
             FlightInput isoInput = new FlightInput();

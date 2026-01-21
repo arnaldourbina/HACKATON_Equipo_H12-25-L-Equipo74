@@ -35,4 +35,44 @@ public class FlightInput {
     public FlightInput() {
     }
 
+    // GETTERS Y SETTERS
+    public String getAerolinea() {
+        return aerolinea;
+    }
+
+    public void setAerolinea(String aerolinea) {
+        this.aerolinea = aerolinea;
+    }
+
+    public String getOrigen() {
+        return origen;
+    }
+
+    public void setOrigen(String origen) {
+        this.origen = origen;
+    }
+
+    public String getDestino() {
+        return destino;
+    }
+
+    public void setDestino(String destino) {
+        this.destino = destino;
+    }
+
+    public String getFechaPartida() {
+        return fecha_partida;
+    }
+
+    public void setFecha_partida(String fecha_partida) {
+        this.fecha_partida = fecha_partida;
+    }
+
+    public Integer getDistanciaKm() {
+        return distancia_km;
+    }
+
+    public void setDistancia_km(Integer distancia_km) {
+        this.distancia_km = distancia_km;
+    }
 }

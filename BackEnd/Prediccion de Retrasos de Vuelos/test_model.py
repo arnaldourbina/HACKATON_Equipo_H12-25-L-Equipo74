@@ -13,12 +13,12 @@ print("✅ Modelo cargado:", type(model))
 # ---------------------------
 ejemplo = pd.DataFrame({
     "AEROLINEA": ["AA"],
-    "AEROPUERTO_ORIGEN": ["LAX"],
-    "AEROPUERTO_DESTINO": ["PBI"],
-    "DISTANCIA": [3000],
-    "ANO": [2015],
-    "MES": [1],
-    "DIA": [1],
+    "AEROPUERTO_ORIGEN": ["SCL"],
+    "AEROPUERTO_DESTINO": ["LAX"],
+    "DISTANCIA": [8000],
+    "ANO": [2013],
+    "MES": [12],
+    "DIA": [17],
     "ES_FIN_DE_SEMANA": [0],
     "TEMPORADA": ["Verano"],
     "HORA_LLEGADA": [14],
@@ -31,7 +31,7 @@ ejemplo = pd.DataFrame({
 # 3. Predicción con umbral fijo
 # ---------------------------
 proba = model.predict_proba(ejemplo)[:, 1][0]
-umbral = 0.7912
+umbral = 0.7912  # 0.7912 
 prevision = "Retrasado" if proba >= umbral else "Puntual"
 
 print("Previsión:", prevision)

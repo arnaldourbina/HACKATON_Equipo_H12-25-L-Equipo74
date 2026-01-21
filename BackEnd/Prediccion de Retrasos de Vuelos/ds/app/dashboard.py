@@ -11,25 +11,29 @@ from datetime import datetime, date
 API_URL = "http://localhost:8080/api/predict" 
 RECENTS_MAX = 20
 
+with open("styles.css", "r") as css_file:
+    css_content = css_file.read()
+    st.markdown(f"<style>{css_content}</style>", unsafe_allow_html=True)
+
 st.set_page_config(page_title="FlightOnTime Dashboard", layout="wide")
 
 if 'recent_predictions' not in st.session_state:
     st.session_state.recent_predictions = deque(maxlen=RECENTS_MAX)
 
 st.title("🛫 FlightOnTime - Predicción Retrasos")
-st.markdown("Dashboard realtime con Java Spring Boot + CatBoost ML")
+st.markdown("Dashboard en tiempo real para predicción de retrasos de vuelos")
 
 # Sidebar - CHECKBOXES
 st.sidebar.header("🔮 Nueva Predicción")
 
 # Checkbox Aerolíneas
 st.sidebar.subheader("Aerolíneas")
-aerolineas_options = ['AS', 'AA', 'US', 'DL', 'NK', 'UA', 'HA', 'B6', 'OO', 'EV', 'MQ',
+aerolineas_options = ['AS', 'AA', 'LA', 'US', 'DL', 'NK', 'UA', 'HA', 'B6', 'OO', 'EV', 'MQ',
        'F9', 'WN', 'VX']
 aerolinea_seleccionada = st.sidebar.selectbox(
     "Selecciona una aerloínea", 
     aerolineas_options
-)[-1]
+)
 # Checkbox Aeropuertos Origen
 st.sidebar.subheader("Origen")
 orígenes_options = ['ANC', 'LAX', 'SFO', 'SEA', 'LAS', 'DEN', 'SLC', 'PDX', 'FAI',
@@ -67,8 +71,8 @@ orígenes_options = ['ANC', 'LAX', 'SFO', 'SEA', 'LAS', 'DEN', 'SLC', 'PDX', 'FA
        'TRI', 'VLD', 'SIT', 'BQK', 'PSG', 'FAY', 'MKG', 'CSG', 'EWN',
        'OME', 'SGU', 'RST', 'GTR', 'BET', 'ABY', 'SWF', 'ILG', 'ADK',
        'UST', 'YAK', 'CDV', 'OTH', 'ADQ', 'PPG', 'BGM', 'BGR', 'ITH',
-       'ACK', 'MVY', 'WYS', 'DLG', 'AKN', 'GST', 'HYA']
-origen = st.sidebar.selectbox("Aeropuertos origen", orígenes_options)[-1]
+       'ACK', 'MVY', 'WYS', 'DLG', 'AKN', 'GST', 'HYA', 'SCL']
+origen = st.sidebar.selectbox("Aeropuertos origen", orígenes_options)
 
 # Checkbox Aeropuertos Destino
 st.sidebar.subheader("Destino")
@@ -107,16 +111,18 @@ destinos_options = ['SEA', 'PBI', 'CLT', 'MIA', 'ANC', 'MSP', 'DFW', 'ATL', 'IAH
        'TWF', 'ADK', 'ELM', 'VLD', 'PIB', 'SUX', 'GUM', 'SCE', 'UST',
        'BQK', 'JLN', 'LWS', 'MQT', 'EWN', 'CSG', 'PBG', 'PSE', 'IAG',
        'YAK', 'CDV', 'OTH', 'ADQ', 'PPG', 'GFK', 'BGM', 'BGR', 'ITH',
-       'ACK', 'MVY', 'WYS', 'DLG', 'AKN', 'GST', 'HYA']
-destino = st.sidebar.selectbox("Aeropuertos destino", destinos_options)[-1]
+       'ACK', 'MVY', 'WYS', 'DLG', 'AKN', 'GST', 'HYA', 'SCL']
+destino = st.sidebar.selectbox("Aeropuertos destino", destinos_options)
 
 # Fecha/Hora
 col1, col2 = st.sidebar.columns(2)
+hoy = date.today()
 fecha_partida = st.sidebar.date_input(
     "Fecha partida", 
-    value=datetime.now().date()
+    value=hoy,
+    max_value=hoy
 )
-hora_partida_str = st.sidebar.text_input("Hora partida (HH:MM:SS)", value="14:00:00", max_chars=8)
+hora_partida_str = st.sidebar.text_input("Hora partida (HH:MM:SS)", value="12:00:00", max_chars=8)
 hora_partida = datetime.strptime(hora_partida_str, "%H:%M:%S").time()
 
 # Distancia
@@ -130,7 +136,7 @@ distancia_km = st.sidebar.number_input(
 )
 
 # Botón Predict
-if st.sidebar.button("🚀 Predecir Retraso", type="primary", use_container_width=True):
+if st.sidebar.button("Predecir Retraso", type="primary", use_container_width=True):
     fecha_iso = f"{fecha_partida}T{hora_partida.strftime('%H:%M:%S')}"
     
     payload = {
@@ -140,79 +146,168 @@ if st.sidebar.button("🚀 Predecir Retraso", type="primary", use_container_widt
         "fecha_partida": fecha_iso,
         "distancia_km": distancia_km
     }
+
+    with st.container():
+        progress_container = st.container()
+        status_container = st.container()
+        
+        progress_bar = progress_container.progress(0)
+        status_text = status_container.empty()
+        
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2: 
+            st.markdown("### 🚀 **Prediciendo...**")
+            st.markdown("**" + aerolinea_seleccionada + " " + origen + "→" + destino + "**")
+        
+        status_text.info("🔗 Conectando backend Java...")
+        progress_bar.progress(25)
+        time.sleep(0.4)
+        
+        status_text.info("🧠 Cargando modelo ML...")
+        progress_bar.progress(50)
+        time.sleep(0.6)
+        
+        status_text.info("⚡ Calculando riesgo retraso...")
+        progress_bar.progress(85)
+
+    try:
+        response = requests.post(API_URL, json=payload, timeout=10)
+        response.raise_for_status()
+        result = response.json()
+
+        progress_bar.progress(100)
+        status_text.success("✅ **¡Predicción lista!**")
+        time.sleep(0.8)
+
+        if result['prevision'] == 'Puntual':
+            st.balloons()
+            col1, col2, col3 = st.columns([1,2,1])
+            with col2:
+                st.success(f"🟢 **¡Vuelo PUNTUAL!** 🎉\n Probabilidad de puntualidad: {result['probabilidad']:.1%}")
+        else:
+            st.snow()            
+            col1, col2, col3 = st.columns([1,2,1])
+            with col2:
+                st.error(f"🔴 **¡Vuelo RETRASADO!** ⚠️\n Probabilidad de retraso: {result['probabilidad']:.1%}")
+
+        st.session_state.recent_predictions.appendleft({
+            'timestamp': time.strftime('%H:%M:%S'),
+            'aerolinea': aerolinea_seleccionada,
+            'origen_destino': f"{origen}-{destino}",
+            'prevision': result['prevision'],
+            'probabilidad': result['probabilidad']
+        })
+        
+        st.sidebar.markdown("### **Resultado**")
+        st.sidebar.metric("Predicción", result['prevision'], delta=None)
+        st.sidebar.metric("Prob. Retraso", f"{result['probabilidad']:.1%}", delta=None)
     
-    with st.spinner("CatBoost prediciendo..."):
-        try:
-            response = requests.post(API_URL, json=payload, timeout=10)
-            response.raise_for_status()
-            result = response.json()
-            
-            # Guarda histórico
-            st.session_state.recent_predictions.appendleft({
-                'timestamp': time.strftime('%H:%M:%S'),
-                'aerolinea': aerolinea_seleccionada,
-                'origen_destino': f"{origen}-{destino}",
-                'prevision': result['prevision'],
-                'probabilidad': result['probabilidad']
-            })
-            
-            # Muestra resultado
-            st.sidebar.markdown("### ✅ **Resultado**")
-            st.sidebar.metric("Predicción", result['prevision'], delta=None)
-            st.sidebar.metric("Prob. Retraso", f"{result['probabilidad']:.1%}", delta=None)
-            st.sidebar.json(payload)
-            
-        except requests.exceptions.RequestException as e:
-            st.sidebar.error(f"**Error API**: {str(e)}")
-        except Exception as e:
-            st.sidebar.error(f"**Error**: {str(e)}")
+    except Exception as e:
+        progress_bar.empty()
+        col1, col2, col3 = st.columns([1,2,1])
+        with col2:
+            st.error(f"❌ **Error predicción**: No se logro establecer conexión con el servidor.")
+    except requests.exceptions.RequestException as e:
+        st.sidebar.error(f"**Error API**: {str(e)}")
+    time.sleep(7)
+    st.rerun()
+
+if st.sidebar.button("🔄 Comenzar Nueva Predicción", type="secondary", use_container_width=True):
+    aerolinea = None
+    origen = None
+    destino = None
+    fecha_partida = datetime.now().date()
+    hora_partida = datetime.now().time()
+    distancia_km = 90
+    st.rerun()
 
 # Main Dashboard
 col_a, col_b = st.columns([2, 1])
 
 with col_a:
-    st.header("📊 Historial Predicciones")
-    if st.session_state.recent_predictions:
-        df = pd.DataFrame(st.session_state.recent_predictions)
-        
-        # Tabla responsive
+    st.header("Historial de Predicciones")
+    if st.button("Actualizar tabla", key="load_history"):
+        try:
+            response = requests.get("http://localhost:8080/api/history", timeout=5)
+            response.raise_for_status()
+            h2_data = response.json()
+            
+            # Convierte a df
+            df = pd.DataFrame(h2_data)
+            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df['origen_destino'] = df['origen'] + '→' + df['destino']
+            df['probabilidad'] = df['probabilidad'].astype(float)
+            
+            st.session_state.h2_history = df.to_dict('records')
+            st.success(f"✅ {len(df)} predicciones cargadas desde H2!")
+            st.rerun()
+            
+        except Exception as e:
+            st.error(f"❌ Error en la base de datos: No se logró establecer conexión con el servidor.")
+    
+    df = pd.DataFrame(st.session_state.get('h2_history', st.session_state.get('recent_predictions', [])))
+    
+    if not df.empty:
         st.dataframe(
             df[['timestamp', 'aerolinea', 'origen_destino', 'prevision', 'probabilidad']]
-            .style.format({'probabilidad': '{:.1%}'}), 
+            .style.format({'probabilidad': '{:.1%}'}),
             use_container_width=True
         )
         
-        # Gráfico barras
+        df_plot = df.tail(20).copy()
+        df_plot['reciente'] = range(len(df_plot)-1, -1, -1)
+        df_plot['tiempo_rel'] = df_plot['reciente'].apply(lambda x: f"Hace {x} pred.")
+        
         fig = px.bar(
-            df.tail(10), 
-            x='timestamp', 
-            y='probabilidad', 
-            color='prevision',
+            df_plot, x='tiempo_rel', y='probabilidad', color='prevision',
             hover_data=['aerolinea', 'origen_destino'],
-            title="Probabilidad Retraso (Últimas 10)",
-            color_discrete_map={'Retraso': '#ef4444', 'Puntual': '#10b981'}
+            title="Grafico interactivo de predicciones",
+            labels={'probabilidad': '% Riesgo'},
+            color_discrete_map={'Retraso': "#df2424", 'Puntual': "#0fce5f"}
         )
+        fig.update_xaxes(title="Reciente ←")
         st.plotly_chart(fig, use_container_width=True)
         
-        # KPI cards
         retrasos_pct = (df['prevision'] == 'Retraso').mean() * 100
-        total_preds = len(df)
-        st.metric("Tasa Retrasos Prevista", f"{retrasos_pct:.1f}%", delta=None)
-        st.metric("Total Predicciones", total_preds)
         
     else:
-        st.info("👈 **Selecciona aerolínea/origen/destino** en sidebar y predice")
+        st.info("👆 **Cargar Histórico H2** o predice nuevas")
 
 with col_b:
-    st.header("📈 Stats Realtime")
-    
-    retrasos_count = sum(1 for p in st.session_state.recent_predictions if p['prevision'] == 'Retraso')
-    puntual_count = len(st.session_state.recent_predictions) - retrasos_count
-    
-    col1, col2 = st.columns(2)
-    col1.metric("Retrasos", retrasos_count)
-    col2.metric("Puntuales", puntual_count)
+        st.header("Metricas de predicciones hoy")
+        if st.button("Actualizar metricas", key="Actualiza_metricas"):
+            try:
+                response = requests.get("http://localhost:8080/api/stats")
+                stats_data = response.json()
+                
+                st.session_state.stats_data = stats_data
+                
+                st.success("Estadisticas actualizadas desde la base de datos!")
+                st.rerun()
+            except requests.exceptions.RequestException as e:
+                st.session_state.stats_data = None
+                st.error(f"Servicio Inaccesible: No se logró establecer conexión con el servidor.")
+            except Exception as e:
+                st.session_state.stats_data = None
+                st.error(f"Error: {str(e)}")
+
+        if hasattr(st.session_state, 'stats_data') and st.session_state.stats_data:
+            stats = st.session_state.stats_data
+
+            col1, col2 = st.columns(2)
+            col1.metric("Retrasos", stats['retrasados'])
+            col2.metric("Puntuales", stats['totalPredicciones'] - stats['retrasados'])
+
+            st.metric("Tasa Retraso", f"{stats['porcentajeRetraso']:.1f}%")
+            st.metric("Total Predicciones Hoy", stats['totalPredicciones'])
+            st.caption(f"Top: {stats['aerolineaTop']}")
+        else:
+            col1, col2 = st.columns(2)
+            col1.metric("Retrasos", 0)
+            col2.metric("Puntuales", 0)
+            st.metric("Tasa Retraso", "0.0%")
+            st.info("Click **Actualizar** para obtener estadísticas desde la base de datos")
 
 # Footer
 st.markdown("---")
-st.markdown("*Hecho en Java Spring Boot + Python + Modelos de ML*")
+st.markdown("*Hecho por H12-25-L-Equipo 74* para Hackathon ONE II - Latam @ NoCountry 2025-2026")

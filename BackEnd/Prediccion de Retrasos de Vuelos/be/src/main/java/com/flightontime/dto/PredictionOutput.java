@@ -9,13 +9,30 @@ public class PredictionOutput {
     @JsonProperty("probabilidad")
     public Double probabilidad;
 
-    // Constructor vacío OBLIGATORIO
+    // Constructor
     public PredictionOutput() {
     }
 
-    // Constructor completo
+    // Constructor
     public PredictionOutput(String prevision, Double probabilidad) {
         this.prevision = prevision;
+        this.probabilidad = probabilidad;
+    }
+
+    // GETTERS Y SETTERS
+    public String getPrevision() {
+        return prevision;
+    }
+
+    public Double getProbabilidad() {
+        return probabilidad;
+    }
+
+    public void setPrevision(String prevision) {
+        this.prevision = prevision;
+    }
+
+    public void setProbabilidad(Double probabilidad) {
         this.probabilidad = probabilidad;
     }
 }
