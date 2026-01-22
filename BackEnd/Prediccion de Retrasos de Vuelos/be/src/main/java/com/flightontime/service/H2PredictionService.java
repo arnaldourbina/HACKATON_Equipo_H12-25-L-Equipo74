@@ -1,6 +1,5 @@
 package com.flightontime.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.flightontime.dto.FlightInput;
 import com.flightontime.dto.PredictionOutput;
 import com.flightontime.entity.H2Prediction;

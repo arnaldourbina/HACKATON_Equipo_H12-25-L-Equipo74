@@ -1,3 +1,4 @@
+from io import BytesIO
 import streamlit as st
 import requests
 import pandas as pd
@@ -135,7 +136,7 @@ distancia_km = st.sidebar.number_input(
     help="Ingresa la distancia entre aeropuertos"
 )
 
-# Botón Predict
+# Predict
 if st.sidebar.button("Predecir Retraso", type="primary", use_container_width=True):
     fecha_iso = f"{fecha_partida}T{hora_partida.strftime('%H:%M:%S')}"
     
@@ -209,17 +210,48 @@ if st.sidebar.button("Predecir Retraso", type="primary", use_container_width=Tru
             st.error(f"❌ **Error predicción**: No se logro establecer conexión con el servidor.")
     except requests.exceptions.RequestException as e:
         st.sidebar.error(f"**Error API**: {str(e)}")
-    time.sleep(7)
+    time.sleep(5)
     st.rerun()
 
-if st.sidebar.button("🔄 Comenzar Nueva Predicción", type="secondary", use_container_width=True):
-    aerolinea = None
-    origen = None
-    destino = None
-    fecha_partida = datetime.now().date()
-    hora_partida = datetime.now().time()
-    distancia_km = 90
-    st.rerun()
+# Sidebar - Funcion Batch Predict.
+st.sidebar.markdown("---")
+st.sidebar.header("⚡ **Predicción en lote**")
+
+
+uploaded_file = st.sidebar.file_uploader(
+    "Sube el archivo CSV que contiene los Vuelos", 
+    type="csv",
+    help="El archivo DEBE ser -> aerolinea,origen,destino,fecha_partida,distancia_km en formato csv."
+)
+if uploaded_file is not None:
+    df_preview = pd.read_csv(uploaded_file)
+    col_btn1, col_btn2 = st.sidebar.columns(2)
+    with col_btn1:
+        if st.button("**Vista Previa**", type="secondary"):
+            st.sidebar.dataframe(df_preview.head(), use_container_width=True)
+    with col_btn2:
+        if st.button("**Predecir Lote**", type="primary"):
+            with st.spinner("Procesando lote..."):
+                try:
+                    files = {'file': (uploaded_file.name, uploaded_file.getvalue(), 'text/csv')}
+                    response = requests.post(
+                        "http://localhost:8080/api/predict/batch",
+                        files=files,
+                        timeout=30
+                    )
+                    response.raise_for_status()
+
+                    st.sidebar.download_button(
+                        label="📥 **Descargar Predicciones**",
+                        data=response.content,
+                        file_name=f"archivo_con_{len(df_preview)}_vuelos_predichos.csv",
+                        mime="text/csv",
+                        use_container_width=True
+                    )
+                    st.sidebar.success(f"**¡{len(df_preview)} predicciones listas!**")
+                except Exception as e:
+                    st.error(f"Error batch: {str(e)}")
+st.sidebar.markdown("---")
 
 # Main Dashboard
 col_a, col_b = st.columns([2, 1])

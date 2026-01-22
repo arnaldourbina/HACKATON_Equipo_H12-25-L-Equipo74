@@ -9,6 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class DsClientService {
@@ -47,4 +49,13 @@ public class DsClientService {
             throw new RestClientException("Proxy DS falló", e);
         }
     }
+
+    public List<PredictionOutput> predictBatch(List<FlightInput> vuelos) {
+        List<PredictionOutput> resultados = new ArrayList<>();
+        for (FlightInput vuelo : vuelos) {
+            resultados.add(predict(vuelo));
+        }
+        return resultados;
+    }
+
 }

@@ -35,8 +35,10 @@ Se creará un documento requeriments.txt con todas las dependencias necesarias p
                                         POSTMAN
 
 GET -> http://localhost:8080/api/stats - Obtiene las información relevante acerca de los vuelos y sus retrasos.
+GET -> http://localhost:8080/api/history - Despliega un historial con las predicciones realizadas durante la sesión.
 POST -> http://localhost:8080/api/predict - Realiza la prediccion por medio de JAVA Spring Boot.
 POST -> http://localhost:5000/predict - Realiza la predicción por medio de FastAPI.
+POST -> /predict/batch - Usado para realizar la prediccion en lotes.
 
 ============================================================================================================================================
 
@@ -49,6 +51,14 @@ Retrasado:
   "destino": "FLL",
   "fecha_partida": "2020-02-01T04:30:00",
   "distancia_km": 8550
+}
+
+{
+  "aerolinea": "MQ",
+  "origen": "ONT",
+  "destino": "PHX",
+  "fecha_partida": "2026-01-22T05:30:00",
+  "distancia_km": 4430
 }
 
 Puntual:

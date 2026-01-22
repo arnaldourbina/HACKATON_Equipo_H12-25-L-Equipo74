@@ -25,11 +25,13 @@ public class FlightInput {
     @JsonProperty("distancia_km")
     public Integer distancia_km;
 
-    @Override
-    public String toString() {
-        return String.format(
-                "FlightInput{aerolinea='%s', origen='%s', destino='%s', fecha_partida=%s, distancia_km=%d}",
-                aerolinea, origen, destino, fecha_partida, distancia_km);
+    public FlightInput(String aerolinea, String origen, String destino,
+            String fecha_partida, Integer distancia_km) {
+        this.aerolinea = aerolinea;
+        this.origen = origen;
+        this.destino = destino;
+        this.fecha_partida = fecha_partida;
+        this.distancia_km = distancia_km;
     }
 
     public FlightInput() {
@@ -74,5 +76,12 @@ public class FlightInput {
 
     public void setDistancia_km(Integer distancia_km) {
         this.distancia_km = distancia_km;
+    }
+
+    @Override
+    public String toString() {
+        return String.format(
+                "FlightInput{aerolinea='%s', origen='%s', destino='%s', fecha_partida=%s, distancia_km=%d}",
+                aerolinea, origen, destino, fecha_partida, distancia_km);
     }
 }

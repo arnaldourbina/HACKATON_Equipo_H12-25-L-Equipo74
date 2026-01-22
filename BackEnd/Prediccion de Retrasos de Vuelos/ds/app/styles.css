@@ -1,20 +1,53 @@
 button[kind='primary'] {
-  background-color: #0cd147 !important;
+  background-color: #1dd354 !important;
   color: white !important;
+  border-radius: 8px;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
 }
 
 button[kind='primary']:hover {
-  background-color: #038d21 !important;
+  background-color: #02831e !important;
+  transform: scale(1.02);
 }
 
-button[title*='Predecir'],
 button[kind='secondary'] {
   background-color: #3b82f6 !important;
   color: white !important;
   border-radius: 8px;
+  border: none;
+  padding: 1rem 1rem;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
-button[title*='Predecir']:hover,
 button[kind='secondary']:hover {
   background-color: #2563eb !important;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+  transform: scale(1.02);
+}
+
+div.stDownloadButton > button {
+  background-color: #f59e0b !important;
+  color: white !important;
+  border-radius: 8px;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+}
+
+div.stDownloadButton > button:hover {
+  background-color: #d97706 !important;
+  transform: scale(1.02);
+}
+
+div.stButton > button[key='clear_red'] {
+  background-color: #ef4444 !important;
+  color: white !important;
+  border-radius: 8px;
+}
+
+div.stButton > button[key='clear_red']:hover {
+  background-color: #dc2626 !important;
 }
