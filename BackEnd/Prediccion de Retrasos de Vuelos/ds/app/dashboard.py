@@ -9,7 +9,6 @@ import plotly.express as px
 from collections import deque
 import time
 from datetime import datetime, date
-import shap
 
 # Config
 API_URL = "http://localhost:8080/api/predict" 
@@ -33,7 +32,7 @@ st.sidebar.header("🔮 Nueva Predicción")
 # Checkbox Aerolíneas
 st.sidebar.subheader("Aerolíneas")
 aerolineas_options = ['AS', 'AA', 'LA', 'US', 'DL', 'NK', 'UA', 'HA', 'B6', 'OO', 'EV', 'MQ',
-       'F9', 'WN', 'VX']
+       'F9', 'WN', 'VX', 'LATAM']
 aerolinea_seleccionada = st.sidebar.selectbox(
     "Selecciona una aerloínea", 
     aerolineas_options
