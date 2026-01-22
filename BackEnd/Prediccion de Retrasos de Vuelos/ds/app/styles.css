@@ -22,6 +22,22 @@ button[kind='secondary'] {
   box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
+button[kind='tertiary']:hover {
+  background-color: #e72121 !important;
+  box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+  transform: scale(1.02);
+}
+
+button[kind='tertiary'] {
+  background-color: #9b1313 !important;
+  color: white !important;
+  border-radius: 8px;
+  border: none;
+  padding: 1rem 1rem;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
 button[kind='secondary']:hover {
   background-color: #2563eb !important;
   box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);

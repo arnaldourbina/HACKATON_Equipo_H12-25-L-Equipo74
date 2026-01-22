@@ -2,11 +2,14 @@ from io import BytesIO
 import streamlit as st
 import requests
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 from datetime import datetime
 import plotly.express as px
 from collections import deque
 import time
 from datetime import datetime, date
+import shap
 
 # Config
 API_URL = "http://localhost:8080/api/predict" 
@@ -162,11 +165,11 @@ if st.sidebar.button("Predecir Retraso", type="primary", use_container_width=Tru
         
         status_text.info("🔗 Conectando backend Java...")
         progress_bar.progress(25)
-        time.sleep(0.4)
+        time.sleep(1.5)
         
         status_text.info("🧠 Cargando modelo ML...")
         progress_bar.progress(50)
-        time.sleep(0.6)
+        time.sleep(1.5)
         
         status_text.info("⚡ Calculando riesgo retraso...")
         progress_bar.progress(85)
@@ -295,15 +298,13 @@ with col_a:
             hover_data=['aerolinea', 'origen_destino'],
             title="Grafico interactivo de predicciones",
             labels={'probabilidad': '% Riesgo'},
-            color_discrete_map={'Retraso': "#df2424", 'Puntual': "#0fce5f"}
+            color_discrete_map={'Retraso': "#df2424", 'Puntual': "#0fce5f"},
+            height=300
         )
         fig.update_xaxes(title="Reciente ←")
         st.plotly_chart(fig, use_container_width=True)
         
         retrasos_pct = (df['prevision'] == 'Retraso').mean() * 100
-        
-    else:
-        st.info("👆 **Cargar Histórico H2** o predice nuevas")
 
 with col_b:
         st.header("Metricas de predicciones hoy")
@@ -339,6 +340,74 @@ with col_b:
             col2.metric("Puntuales", 0)
             st.metric("Tasa Retraso", "0.0%")
             st.info("Click **Actualizar** para obtener estadísticas desde la base de datos")
+
+st.markdown("---")
+st.subheader("Explicacion de predicciones individuales:")
+        
+seleccion = st.selectbox(
+        "Selecciona un vuelo para obtener sus metricas de explicación:",
+        st.session_state.get('h2_history', []),
+        format_func=lambda x: f"{x['timestamp']} | {x['aerolinea']} {x['origen']}→{x['destino']} ({x['prevision']} {float(x['probabilidad']):.0%})"
+    )
+        
+if st.button("🔍 Explicar vuelo seleccionado", type="primary", use_container_width=True):
+            with st.spinner("Generando explicación SHAP..."):
+
+                payload = {
+                    "aerolinea": seleccion['aerolinea'],
+                    "origen": seleccion['origen'],
+                    "destino": seleccion['destino'],
+                    "fecha_partida": seleccion.get('fecha_partida', '2026-01-22T14:00:00'),
+                    "distancia_km": float(seleccion.get('distancia_km', 4000))
+                }
+                
+                try:
+                    response = requests.post("http://127.0.0.1:5000/explain", json=payload, timeout=10)
+                    
+                    if response.status_code == 200:
+                        data = response.json()
+                        shap_vals = np.array(data['shap_values'])
+                        base_value = data['base_value']
+                        features = data['features']
+                        feature_values_str = list(data['feature_values'].values())
+                        
+                        st.markdown(f"**Análisis para:** {seleccion['aerolinea']} {seleccion['origen']}→{seleccion['destino']}")
+                        
+                        st.caption("Contribución de cada variable al riesgo")
+                        sorted_idx = np.argsort(shap_vals)[::-1]
+                        sorted_shap = shap_vals[sorted_idx]
+                        sorted_features = [features[i] for i in sorted_idx]
+                        
+                        fig_water, ax = plt.subplots(figsize=(10, 5))
+                        colors = ['red' if x < 0 else 'green' for x in sorted_shap]
+                        y_pos = np.arange(len(sorted_features))
+                        ax.barh(y_pos, sorted_shap, color=colors, alpha=0.7)
+                        ax.axvline(x=base_value, color='black', linestyle='--', label=f'Base: {base_value:.2f}')
+                        ax.set_yticks(y_pos)
+                        ax.set_yticklabels(sorted_features)
+                        ax.set_xlabel("Impacto en Probabilidad")
+                        st.pyplot(fig_water)
+                        plt.close()
+
+                        st.subheader("Tabla de valores que afectan a la predicción del vuelo:")
+                        df_valores = pd.DataFrame({
+                            'Feature': features,
+                            'Valor': feature_values_str,
+                            'SHAP': [f"{v:.3f}" for v in shap_vals]
+                        })
+                        
+                        st.dataframe(
+                            df_valores.style.background_gradient(subset=['SHAP'], cmap='RdYlGn_r'),
+                            use_container_width=True
+                        )
+                        
+                    else:
+                        st.error(f"Error SHAP API: {response.text}")
+                except Exception as e:
+                    st.error(f"Error conectando a SHAP: {str(e)}")
+        
+else:
+    st.info("*En caso de no existir nada en el historial **Cargar Histórico H2** o predice nuevos vuelos para generar explicaciones.*")
 
 # Footer
 st.markdown("---")
