@@ -1,0 +1,121 @@
+============================================================================================================================================
+                                        DataScience
+todos los comandos de FastAPI, modelos. etc, son ejecutados en el directorio ds en su mayoria.
+
+.\venv\Scripts\activate -> Activa el entorno de ds (navegar hasta el directorio ds)
+(en directorio ds) python app/main.py -> Corre uvicorn para la ejecución de FastAPI.
+
+Si el proyecto fue descargado. En caso de que exista, borrar la carpeta venv que se encuentra
+dentro de ds, y crear la suya propia en su pc. con el comando;
+
+python -m venv nombre_del_entorno (en este caso venv, pero puede ser venv3.12 <- version de python instalada. u otro nombre que tú quieras.)
+============================================================================================================================================
+
+============================================================================================================================================
+                                            JAVA    
+Todos los comandos de JAVA, son ejecutados en su mayoria en el directorio be.
+
+mvn clean compile -> para compilar el proyecto en busca de errores.
+mvn spring-boot:run -> Corre Maven para la ejecución de la API REST de JAVA.
+============================================================================================================================================
+
+============================================================================================================================================
+                                      H2 - Persistencia
+
+Para acceder a la base de datos de H2 y ver el historico de predicciones:
+-> http://localhost:8080/h2-console/
+
+user jdbc:h2:mem:flightontime
+
+============================================================================================================================================
+
+Se creará un documento requeriments.txt con todas las dependencias necesarias para ejecutar el proyecto.
+
+============================================================================================================================================
+                                        POSTMAN
+
+GET -> http://localhost:8080/api/stats - Obtiene las información relevante acerca de los vuelos y sus retrasos.
+GET -> http://localhost:8080/api/history - Despliega un historial con las predicciones realizadas durante la sesión.
+POST -> http://localhost:8080/api/predict - Realiza la prediccion por medio de JAVA Spring Boot.
+POST -> http://localhost:5000/predict - Realiza la predicción por medio de FastAPI.
+POST -> /predict/batch - Usado para realizar la prediccion en lotes.
+
+============================================================================================================================================
+
+                                        DATOS DE PRUEBA
+Retrasado:
+
+{
+  "aerolinea": "AA",
+  "origen": "IAG",
+  "destino": "FLL",
+  "fecha_partida": "2020-02-01T04:30:00",
+  "distancia_km": 8550
+}
+
+{
+  "aerolinea": "MQ",
+  "origen": "ONT",
+  "destino": "PHX",
+  "fecha_partida": "2026-01-22T05:30:00",
+  "distancia_km": 4430
+}
+
+{
+  "aerolinea": "DL",
+  "origen": "MIA",
+  "destino": "LGA",
+  "fecha_partida": "2016-2-5T4:30:00",
+  "distancia_km": 1763
+}
+
+{
+  "aerolinea": "WN",
+  "origen": "MDW",
+  "destino": "FLL",
+  "fecha_partida": "2016-12-27T4:00:00",
+  "distancia_km": 1878
+}
+
+{
+  "aerolinea": "WN",
+  "origen": "MDW",
+  "destino": "FLL",
+  "fecha_partida": "2026-12-27T4:00:00",
+  "distancia_km": 1878
+}
+
+{
+  "aerolinea": "AA",
+  "origen": "DFW",
+  "destino": "STL",
+  "fecha_partida": "2026-6-15T4:50:00",
+  "distancia_km": 885
+}. Respuesta: {
+  "prevision": "Retrasado",
+  "probabilidad": 0.805
+  }
+
+Cambiando solo la aerolínea "LATAM" que ha sido más puntual, baja la probabilidad de retraso, manteniendo los mismos datos de la aerolínea anterior.   
+{
+  "aerolinea": "LATAM",
+  "origen": "DFW",
+  "destino": "STL",
+  "fecha_partida": "2026-6-15T4:50:00",
+  "distancia_km": 885
+} Respuesta: {
+  "prevision": "Puntual",
+  "probabilidad": 0.713
+}
+
+Puntual:
+
+{
+    "aerolinea": "LA",
+    "origen": "SCL",
+    "destino": "JFK",
+    "fecha_partida": "2026-01-12T15:00:00",
+    "distancia_km": 8200
+}
+
+Con error:

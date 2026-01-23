@@ -73,14 +73,13 @@ def predict(flight: FlightInput):
         ]
     })
 
-    # Predicción con CatBoost
     proba = model.predict_proba(df)[:, 1][0]
 
-    # Usar umbral fijo = 0.7912 (interno, no se expone)
+    # Usa el umbral fijo optimo = 0.7912
     umbral = 0.7912
     prevision = "Retrasado" if proba >= umbral else "Puntual"
 
     return {
         "prevision": prevision,
-        "probabilidad": round(float(proba), 3)
+        "probabilidad": round(float(proba), 2)
     }

@@ -1,8 +1,3 @@
-# Entornos virtuales
-venv310/
-__pycache__/
-.ipynb_checkpoints/
-
 # Binarios y librerías
 *.pyd
 *.dll
@@ -49,6 +44,7 @@ out/
 .idea/
 
 # --- Python ---
+venv/
 venv310/
 __pycache__/
 .ipynb_checkpoints/

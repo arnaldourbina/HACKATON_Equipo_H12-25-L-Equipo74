@@ -110,7 +110,7 @@ def entrenar_modelos(datos: pd.DataFrame):
         learning_rate=0.03,
         random_seed=42,
         verbose=100,
-        loss_function="Logloss",   # eval_metric se define aquí
+        loss_function="Logloss", 
         eval_metric="Logloss",
         class_weights=[1, len(y_train[y_train==0]) / len(y_train[y_train==1])]
     )

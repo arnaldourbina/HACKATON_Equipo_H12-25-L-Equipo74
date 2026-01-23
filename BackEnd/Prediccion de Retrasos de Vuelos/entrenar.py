@@ -8,7 +8,7 @@ from ds.modelos_retraso import entrenar_modelos
 # 1. Cargar datos
 # ---------------------------
 BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "ds" / "data"   # Ajuste: apunta a ds/data
+DATA_DIR = BASE_DIR / "ds" / "data" 
 MODEL_DIR = BASE_DIR / "ds" / "model"
 
 datos = pd.read_csv(DATA_DIR / "flight_clean.csv")
@@ -48,7 +48,6 @@ if "learn" in evals_result and "Logloss" in evals_result["learn"]:
     plt.tight_layout()
     plt.show()
 
-    # Guardar gráfico como PNG
     plt.savefig(MODEL_DIR / "catboost_learning_curve.png")
     print("📊 Curva de aprendizaje guardada en:", MODEL_DIR / "catboost_learning_curve.png")
 else:

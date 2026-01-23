@@ -1,74 +1,144 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel, Field
-import joblib
+from fastapi import FastAPI
+from pydantic import BaseModel
 import pandas as pd
-from datetime import datetime
-from typing import List
-from collections import deque
+import joblib
+import shap
+import uvicorn
+from pathlib import Path
+# ---------------------------
+# 1. Definir app
+# ---------------------------
+app = FastAPI()
 
-app = FastAPI(title="FlightOnTime DS Service", version="0.1.0")
-
+# ---------------------------
+# 2. Definir input simplificado
+# ---------------------------
 class FlightInput(BaseModel):
-    aerolinea: str = Field(..., min_length=1)
-    origen: str = Field(..., min_length=3, max_length=4)
-    destino: str = Field(..., min_length=3, max_length=4)
-    fecha_partida: str = Field(..., regex=r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$")
-    distancia_km: float = Field(..., gt=0)
+    aerolinea: str
+    origen: str
+    destino: str
+    fecha_partida: str
+    distancia_km: float
 
-class PredictionOutput(BaseModel):
-    prevision: str
-    probabilidad: float
+# ---------------------------
+# 3. Cargar modelo CatBoost
+# ---------------------------
+BASE_DIR = Path(__file__).resolve().parent.parent
+MODEL_DIR = BASE_DIR / "model"
 
-class BatchInput(BaseModel):
-    vuelos: List[FlightInput]
+model = joblib.load(MODEL_DIR / "cat_model.joblib")
 
-# Cargar modelo al iniciar
-model = joblib.load("model/flight_delay_model.joblib")
+# Cargar datos de fondo para SHAP explainer
+explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
 
-# Memoria simple para /stats
-last_predictions = deque(maxlen=500)
+@app.get("/")
+def root():
+    return {"message": "API FlightOnTime funcionando"}
 
-def build_features(fi: FlightInput) -> pd.DataFrame:
-    try:
-        fecha = datetime.fromisoformat(fi.fecha_partida)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="fecha_partida inválida, use formato ISO: YYYY-MM-DDThh:mm:ss")
-    hora = fecha.hour
-    dia_semana = fecha.weekday()
-    X = pd.DataFrame([{
-        'aerolinea': fi.aerolinea,
-        'origen': fi.origen,
-        'destino': fi.destino,
-        'hora': hora,
-        'dia_semana': dia_semana,
-        'distancia_km': fi.distancia_km
-    }])
-    return X
+# ---------------------------
+# 4. Endpoint de predicción
+# ---------------------------
+@app.post("/predict")
+def predict(flight: FlightInput):
+    fecha = pd.to_datetime(flight.fecha_partida)
+    hora_llegada = fecha.hour
+    llegada_programa = fecha.hour
 
-@app.post("/predict", response_model=PredictionOutput)
-def predict(fi: FlightInput):
-    X = build_features(fi)
-    proba = float(model.predict_proba(X)[0, 1])
-    umbral = 0.7912   # Umbral óptimo definido en entrenamiento
-    pred = "Retrasado" if proba >= umbral else "Puntual"
-    last_predictions.append({'ts': datetime.utcnow(), 'pred': pred})
-    return {"prevision": pred, "probabilidad": round(proba, 4)}
+    # Construir DataFrame de entrada para el modelo
+    df = pd.DataFrame({
+        "AEROLINEA": [flight.aerolinea],
+        "AEROPUERTO_ORIGEN": [flight.origen],
+        "AEROPUERTO_DESTINO": [flight.destino],
+        "DISTANCIA": [flight.distancia_km],
+        "ANO": [fecha.year],
+        "MES": [fecha.month],
+        "DIA": [fecha.day],
+        "ES_FIN_DE_SEMANA": [1 if fecha.weekday() in [5,6] else 0],
+        "TEMPORADA": ["Verano" if fecha.month in [12,1,2] else
+                      "Otoño" if fecha.month in [3,4,5] else
+                      "Invierno" if fecha.month in [6,7,8] else
+                      "Primavera"],
+        "HORA_LLEGADA": [hora_llegada],
+        "FRANJA_HORARIA_LLEGADA": [
+            "Madrugada" if 0 <= hora_llegada < 6 else
+            "Mañana" if 6 <= hora_llegada < 12 else
+            "Tarde" if 12 <= hora_llegada < 18 else
+            "Noche"
+        ],
+        "LLEGADA_PROGRAMA": [llegada_programa],
+        "FRANJA_LLEGADA_PROGRAMA": [
+            "Madrugada" if 0 <= llegada_programa < 6 else
+            "Mañana" if 6 <= llegada_programa < 12 else
+            "Tarde" if 12 <= llegada_programa < 18 else
+            "Noche"
+        ]
+    })
 
-@app.get("/stats")
-def stats():
-    total = len(last_predictions)
-    if total == 0:
-        return {"total": 0, "porcentaje_retrasado": 0.0}
-    retrasados = sum(1 for p in last_predictions if p['pred'] == "Retrasado")
-    return {"total": total, "porcentaje_retrasado": round(retrasados / total, 4)}
+    proba = model.predict_proba(df)[:, 1][0]
 
-@app.post("/batch")
-def batch_predict(batch: BatchInput):
-    outputs = []
-    umbral = 0.7912   # Usar el mismo umbral en batch
-    for fi in batch.vuelos:
-        X = build_features(fi)
-        proba = float(model.predict_proba(X)[0, 1])
-        pred = "Retrasado" if proba >= umbral else "Puntual"
-        outputs.append({"prevision": pred, "probabilidad": round(proba, 4)})
-    return {"resultados": outputs}
+    umbral = 0.30
+    prevision = "Retrasado" if proba >= umbral else "Puntual"
+
+    return {
+        "prevision": prevision,
+        "probabilidad": round(float(proba), 2)
+    }
+
+@app.post("/explain")
+def explain(flight: FlightInput):
+    fecha = pd.to_datetime(flight.fecha_partida)
+    hora_llegada = fecha.hour
+    llegada_programa = fecha.hour
+
+    df = pd.DataFrame({ 
+        "AEROLINEA": [flight.aerolinea],
+        "AEROPUERTO_ORIGEN": [flight.origen],
+        "AEROPUERTO_DESTINO": [flight.destino],
+        "DISTANCIA": [flight.distancia_km],
+        "ANO": [fecha.year],
+        "MES": [fecha.month],
+        "DIA": [fecha.day],
+        "ES_FIN_DE_SEMANA": [1 if fecha.weekday() in [5,6] else 0],
+        "TEMPORADA": ["Verano" if fecha.month in [12,1,2] else
+                      "Otoño" if fecha.month in [3,4,5] else
+                      "Invierno" if fecha.month in [6,7,8] else "Primavera"],
+        "HORA_LLEGADA": [hora_llegada],
+        "FRANJA_HORARIA_LLEGADA": [
+            "Madrugada" if 0 <= hora_llegada < 6 else
+            "Mañana" if 6 <= hora_llegada < 12 else
+            "Tarde" if 12 <= hora_llegada < 18 else "Noche"
+        ],
+        "LLEGADA_PROGRAMA": [llegada_programa],
+        "FRANJA_LLEGADA_PROGRAMA": [
+            "Madrugada" if 0 <= llegada_programa < 6 else
+            "Mañana" if 6 <= llegada_programa < 12 else
+            "Tarde" if 12 <= llegada_programa < 18 else "Noche"
+        ]
+    })
+
+    categorical_features = [
+        "AEROLINEA","AEROPUERTO_ORIGEN","AEROPUERTO_DESTINO",
+        "MES","DIA","TEMPORADA","FRANJA_HORARIA_LLEGADA","FRANJA_LLEGADA_PROGRAMA"
+    ]
+    
+    # Limpieza si aplica
+    for col in categorical_features:
+        df[col] = df[col].astype(str).fillna("missing")
+    numeric_features = ["DISTANCIA","ANO","ES_FIN_DE_SEMANA","HORA_LLEGADA","LLEGADA_PROGRAMA"]
+    for col in numeric_features:
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(df[col].mean())
+
+    valores_shap = explainer.shap_values(df)
+    proba = model.predict_proba(df)[:, 1][0]
+
+    return {
+        "shap_values": valores_shap[0].tolist(), 
+        "base_value": float(explainer.expected_value),
+        "features": df.columns.tolist(),
+        "feature_values": df.iloc[0].astype(object).to_dict(),
+        "probabilidad": round(float(proba), 4)
+    }
+
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=5000, reload=True)
