@@ -215,7 +215,7 @@ git lfs pull
 
 ---
 ---
-# ✈️ Predicción de Retrasos de Vuelos con CatBoost**
+# ✈️ Predicción de Retrasos de Vuelos con CatBoost
 
 ## 📌 Descripción
 
