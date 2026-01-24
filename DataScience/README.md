@@ -243,12 +243,46 @@ Cuando usar:
 - RETRASO_CLIMA → minutos de retraso por condiciones meteorológicas.
 
  **📈 Variables de resultado**
+- HORA_LLEGADA → el dato observado, lo que efectivamente ocurrió.
 - LLEGADA_PROGRAMA → hora de llegada programada (en formato decimal de horas).
 - RETRASO_GRAVE → indicador binario (0/1) de si el retraso fue considerado grave según el umbral definido (>30 min).
 
 🌌 El dataset combina datos básicos del vuelo, estado operativo (cancelado, desviado) y causas de retraso, lo que permite analizar tanto la puntualidad como los factores que afectan la operación.
 
+**📊 Observaciones principales**
 
+1. Variables más influyentes
+- HORA_LLEGADA (51.6%) y LLEGADA_PROGRAMA (40.3%) concentran casi 92% de la importancia total.
+  
+👉 Esto indica que el modelo depende fuertemente de la hora real y la hora programada de llegada para explicar el fenómeno (probablemente retrasos o puntualidad).
+
+- Estas dos variables dominan el comportamiento del modelo, lo que sugiere que la diferencia entre hora real y programada es el factor crítico.
+
+2. Variables de importancia media
+- FRANJA_HORARIA_LLEGADA (4.2%) y FRANJA_LLEGADA_PROGRAMA (2.6%) aportan algo de información adicional.
+
+👉 Refuerzan la idea de que los patrones horarios (mañana, tarde, noche) influyen en la probabilidad de retrasos.
+
+3. Variables con baja influencia
+- AEROLINEA (0.53%), MES_PARTIDA (0.21%), AEROPUERTO_DESTINO (0.17%), DISTANCIA (0.08%), AEROPUERTO_ORIGEN (0.07%), TEMPORADA (0.03%), DIA_SEMANA (0.01%), ES_FIN_DE_SEMANA (0.001%).
+
+👉 Estas variables apenas aportan información al modelo. Su peso es marginal y podrían considerarse prescindibles en una versión simplificada.
+
+
+||Feature Id|	Importances|
+|--|-------|----------------|
+|0|	HORA_LLEGADA	|51.613366|
+|1	|LLEGADA_PROGRAMA|	40.374843|
+|2	|FRANJA_HORARIA_LLEGADA|	4.238255|
+|3	|FRANJA_LLEGADA_PROGRAMA|	2.640583|
+|4	|AEROLINEA	|0.539006|
+|5	|MES_PARTIDA	|0.210461|
+|6	|AEROPUERTO_DESTINO	|0.172964|
+|7	|DISTANCIA	|0.084732|
+|8	|AEROPUERTO_ORIGEN	|0.071130|
+|9	|TEMPORADA	|0.036600|
+|10|	DIA_SEMANA	|0.016485|
+|11|	ES_FIN_DE_SEMANA	|0.001576|
 
 # 🖌️ DESCRIPCIÓN 
 
