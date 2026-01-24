@@ -427,8 +427,8 @@ Maneja variables categóricas de forma nativa (`cat_features`), sin necesidad de
 - ROC-AUC: 0.97
 
  **Curva ROC-AUC**  
- 
-![Curva ROC](images/Curva_ROC.png)
+
+![Curva ROC](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/Curva_ROC.png)
 
 **Matriz de confusión**
 
@@ -436,7 +436,7 @@ Maneja variables categóricas de forma nativa (`cat_features`), sin necesidad de
 [[1002183   31512]
  [  29915  100206]]
 ````
-![Matriz de Confusión](images/confusion_matrix.png)
+
 ![Matriz de Confusión](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/confusion_matrix.png)
 
 --- 
