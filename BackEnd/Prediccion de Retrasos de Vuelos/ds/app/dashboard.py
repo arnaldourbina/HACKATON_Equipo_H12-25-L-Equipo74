@@ -8,10 +8,11 @@ import plotly.express as px
 from collections import deque
 import time
 from datetime import datetime, date
+import datetime as dt
 
 # Config
-API_URL = "http://localhost:8080/api/predict"
-FASTAPI_URL = "http://localhost:5000"
+API_URL = "http://localhost:8080/api"
+# FASTAPI_URL = "http://localhost:5000"
 RECENTS_MAX = 20
 
 with open("styles.css", "r") as css_file:
@@ -23,8 +24,8 @@ st.set_page_config(page_title="FlightOnTime Dashboard", layout="wide")
 if 'recent_predictions' not in st.session_state:
     st.session_state.recent_predictions = deque(maxlen=RECENTS_MAX)
 
-st.title("🛫 FlightOnTime - Predicción Retrasos")
-st.markdown("Dashboard en tiempo real para predicción de retrasos de vuelos")
+st.title("🛫 FlightOnTime - Predicción de vuelos.")
+st.markdown("Dashboard en tiempo real para predicción de retrasos de vuelos.")
 
 # Sidebar - CHECKBOXES
 st.sidebar.header("🔮 Nueva Predicción")
@@ -123,7 +124,7 @@ hoy = date.today()
 fecha_partida = st.sidebar.date_input(
     "Fecha partida", 
     value=hoy,
-    max_value=hoy
+    max_value=dt.date(2027, 1, 30)
 )
 hora_partida_str = st.sidebar.text_input("Hora partida (HH:MM:SS)", value="12:00:00", max_chars=8)
 hora_partida = datetime.strptime(hora_partida_str, "%H:%M:%S").time()
@@ -180,7 +181,7 @@ if st.sidebar.button("Predecir Retraso", type="primary", width='stretch'):
         progress_bar.progress(85)
 
     try:
-        response = requests.post(API_URL, json=payload, timeout=10)
+        response = requests.post(f"{API_URL}/predict", json=payload, timeout=10)
         response.raise_for_status()
         result = response.json()
 
@@ -226,7 +227,7 @@ if st.sidebar.button("Predecir Retraso", type="primary", width='stretch'):
                 }
                 
                 alert_response = requests.post(
-                    f"{FASTAPI_URL}/send-alert", 
+                    f"{API_URL}/send-alert", 
                     json=alert_payload, 
                     timeout=10
                 )
@@ -236,9 +237,6 @@ if st.sidebar.button("Predecir Retraso", type="primary", width='stretch'):
                     st.success(f"✅ ¡Alerta enviada a {email_usuario}! 📧")
                 else:
                     st.warning("⚠️ Error al enviar el email")
-        else:
-            if result['probabilidad'] <= 0.30:
-                st.info("Probabilidad de retraso baja, no es necesario enviar una alerta.")
             
     
     except Exception as e:
@@ -273,7 +271,7 @@ if uploaded_file is not None:
                 try:
                     files = {'file': (uploaded_file.name, uploaded_file.getvalue(), 'text/csv')}
                     response = requests.post(
-                        f"{API_URL}/batch",
+                        f"{API_URL}/predict/batch",
                         files=files,
                         timeout=30
                     )
@@ -298,7 +296,7 @@ with col_a:
     st.header("Historial de Predicciones")
     if st.button("Actualizar tabla", key="load_history"):
         try:
-            response = requests.get("http://localhost:8080/api/history", timeout=5)
+            response = requests.get(f"{API_URL}/history", timeout=5)
             response.raise_for_status()
             h2_data = response.json()
             
@@ -313,7 +311,7 @@ with col_a:
             st.rerun()
             
         except Exception as e:
-            st.error(f"❌ Error en la base de datos: No se logró establecer conexión con el servidor.")
+            st.error(f"❌ Error en la base de datos: Asegurate de que tiene datos, en caso contrario. No se logró establecer conexión con el servidor.")
     
     df = pd.DataFrame(st.session_state.get('h2_history', st.session_state.get('recent_predictions', [])))
     
@@ -345,7 +343,7 @@ with col_b:
         st.header("Metricas de predicciones hoy")
         if st.button("Actualizar metricas", key="Actualiza_metricas"):
             try:
-                response = requests.get("http://localhost:8080/api/stats")
+                response = requests.get(f"{API_URL}/stats")
                 stats_data = response.json()
                 
                 st.session_state.stats_data = stats_data
@@ -386,66 +384,105 @@ seleccion = st.selectbox(
     )
         
 if st.button("🔍 Explicar vuelo seleccionado", type="primary", width='stretch'):
-            with st.spinner("Generando explicación SHAP..."):
+    with st.spinner("Generando explicación SHAP..."):
 
-                payload = {
-                    "aerolinea": seleccion['aerolinea'],
-                    "origen": seleccion['origen'],
-                    "destino": seleccion['destino'],
-                    "fecha_partida": seleccion.get('fecha_partida', '2026-01-22T14:00:00'),
-                    "distancia_km": float(seleccion.get('distancia_km', 4000))
-                }
-                
-                try:
-                    response = requests.post("http://127.0.0.1:5000/explain", json=payload, timeout=10)
-                    
-                    if response.status_code == 200:
-                        data = response.json()
-                        shap_vals = np.array(data['shap_values'])
-                        base_value = data['base_value']
-                        features = data['features']
-                        feature_values_str = list(data['feature_values'].values())
-                        
-                        st.markdown(f"**Análisis para:** {seleccion['aerolinea']} {seleccion['origen']}→{seleccion['destino']}")
-                        
-                        st.caption("Contribución de cada variable al riesgo")
-                        sorted_idx = np.argsort(shap_vals)[::-1]
-                        sorted_shap = shap_vals[sorted_idx]
-                        sorted_features = [features[i] for i in sorted_idx]
-                        
-                        fig_water, ax = plt.subplots(figsize=(12, 6))
-                        colors = ['green' if x < 0 else 'red' for x in sorted_shap]
-                        y_pos = np.arange(len(sorted_features))
-                        bars = ax.barh(y_pos, sorted_shap, color=colors, alpha=0.8, edgecolor='black', linewidth=0.5)
-                        for i, (bar, shap_val) in enumerate(zip(bars, sorted_shap)):
-                            width = bar.get_width()
-                            ax.text(width + 0.005 * np.sign(width), bar.get_y() + bar.get_height()/2,
-                                    f'{shap_val:.3f}', ha='left' if width >= 0 else 'right',
-                                    va='center', fontweight='bold', fontsize=10, color='black')
-                        ax.axvline(x=base_value, color='orange', linestyle='--', linewidth=2, label=f'Base value: {base_value:.3f}')
-                        ax.set_yticks(y_pos)
-                        ax.set_yticklabels(sorted_features, fontsize=11, fontweight='bold')
-                        ax.set_title("Explicación de la decisión del modelo.", fontsize=14, fontweight='bold', pad=20)
-                        ax.set_xlabel("Impacto de features en Prob. Retraso", fontsize=12, fontweight='bold')
-                        ax.text(0.5, -0.20, 
-                        'VERDE disminuye prob. restraso | ROJO aumenta prob. retraso', 
-                        transform=ax.transAxes, ha='center', va='bottom',
-                        fontsize=11, fontweight='bold', 
-                        bbox=dict(boxstyle='round,pad=0.4', facecolor='#FFF3CD', edgecolor='#FFA500', alpha=0.95))
-                        ax.legend(loc='upper right')
-                        ax.grid(axis='x', alpha=0.3)
-                        ax.margins(y=0.02)
-                        plt.tight_layout()
-                        st.pyplot(fig_water)
-                        plt.close()
-                        
-                    else:
-                        st.error(f"Error SHAP API: {response.text}")
-                except Exception as e:
-                    st.error(f"Error conectando a SHAP: {str(e)}")
-        
+        fecha_val = seleccion["fechaPartida"]         
+        dist_val = float(seleccion["distanciaKm"])
+
+        payload = {
+            "aerolinea": seleccion["aerolinea"],
+            "origen": seleccion["origen"],
+            "destino": seleccion["destino"],
+            "fecha_partida": fecha_val,  
+            "distancia_km": dist_val
+        }
+
+        try:
+            
+            response = requests.post(f"{API_URL}/explain", json=payload, timeout=10)
+
+            if response.status_code == 200:
+                data = response.json()
+
+                shap_vals = np.array(data["shap_values"], dtype=float).flatten()
+                base_value = float(data["base_value"])
+                features = data["features"]
+                proba_exp = float(data.get("probabilidad", 0.0))
+
+                st.markdown(
+                    f"**Aerolinea:** {seleccion['aerolinea']} "
+                    f"{seleccion['origen']}→{seleccion['destino']}"
+                )
+
+                # Ordenar SHAP
+                sorted_idx = np.argsort(shap_vals)[::-1]
+                sorted_shap = shap_vals[sorted_idx]
+                sorted_features = [features[i] for i in sorted_idx]
+
+                fig_water, ax = plt.subplots(figsize=(12, 6))
+                colors = ["green" if x < 0 else "red" for x in sorted_shap]
+                y_pos = np.arange(len(sorted_features))
+
+                bars = ax.barh(
+                    y_pos, sorted_shap, color=colors,
+                    alpha=0.8, edgecolor="black", linewidth=0.5
+                )
+
+                for bar, shap_val in zip(bars, sorted_shap):
+                    width = bar.get_width()
+                    ax.text(
+                        width + 0.005 * np.sign(width),
+                        bar.get_y() + bar.get_height() / 2,
+                        f"{shap_val:.2f}",
+                        ha="left" if width >= 0 else "right",
+                        va="center", fontweight="bold",
+                        fontsize=10, color="black",
+                    )
+
+                ax.axvline(
+                    x=base_value, color="orange", linestyle="--",
+                    linewidth=2, label=f"Base value (raw): {base_value:.2f}",
+                )
+                ax.set_yticks(y_pos)
+                ax.set_yticklabels(sorted_features, fontsize=11, fontweight="bold")
+                ax.set_title(
+                    "Explicación de la decisión del modelo",
+                    fontsize=14, fontweight="bold", pad=20,
+                )
+                ax.set_xlabel(
+                    "Impacto de cada variable en la salida del modelo",
+                    fontsize=12, fontweight="bold",
+                )
+                ax.legend(loc="upper right")
+                ax.grid(axis="x", alpha=0.3)
+                ax.margins(y=0.02)
+                plt.tight_layout()
+                st.pyplot(fig_water, clear_figure=True)
+                plt.close(fig_water)
+
+                df_shap = pd.DataFrame({
+                "feature": sorted_features,
+                "shap_value": sorted_shap,
+                })
+
+                df_shap["efecto"] = df_shap["shap_value"].apply(
+                lambda v: "Aumenta riesgo" if v > 0 else "Disminuye riesgo"
+                )
+
+                df_shap["shap_value"] = df_shap["shap_value"].round(2)
+
+                st.subheader("Detalle numérico de la explicación")
+                st.dataframe(df_shap)
+
+            else:
+                st.error(f"Error SHAP API: {response.text}")
+        except Exception as e:
+            st.error(f"Error conectando a SHAP: {str(e)}")
 else:
-    st.info("*En caso de no existir nada en el historial **Cargar Histórico H2** o predice nuevos vuelos para generar explicaciones.*")
+    st.info(
+        "*En caso de no existir nada en el historial **Cargar Histórico H2** "
+        "o predice nuevos vuelos para generar explicaciones.*"
+    )
 
 # Footer
 st.markdown("---")

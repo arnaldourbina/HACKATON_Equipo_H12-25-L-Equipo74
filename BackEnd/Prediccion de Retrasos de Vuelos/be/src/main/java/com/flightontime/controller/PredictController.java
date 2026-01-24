@@ -3,14 +3,17 @@ package com.flightontime.controller;
 import com.flightontime.dto.FlightInput;
 import com.flightontime.dto.PredictionOutput;
 import com.flightontime.dto.StatsDto;
+import com.flightontime.dto.ExplainOutput;
 import com.flightontime.entity.H2Prediction;
 import com.flightontime.service.DsClientService;
+import com.flightontime.dto.FlightEmail;
 import com.flightontime.service.H2PredictionService;
 import com.flightontime.service.H2StatsService;
 import com.flightontime.util.CSVAnalisisVuelos;
 import com.flightontime.repository.H2PredictionRepository;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -80,5 +83,17 @@ public class PredictController {
     public ResponseEntity<List<H2Prediction>> history() {
         List<H2Prediction> recientes = H2PredictionRepository.buscaTopPrediccionesPorTimestampDesc();
         return ResponseEntity.ok(recientes);
+    }
+
+    @PostMapping("/explain")
+    public ResponseEntity<ExplainOutput> explain(@RequestBody FlightInput input) {
+        ExplainOutput explicacion = dsClientService.explain(input);
+        return ResponseEntity.ok(explicacion);
+    }
+
+    @PostMapping("/send-alert")
+    public ResponseEntity<Map<String, Object>> sendAlert(@RequestBody FlightEmail input) {
+        Map<String, Object> result = dsClientService.sendAlert(input);
+        return ResponseEntity.ok(result);
     }
 }

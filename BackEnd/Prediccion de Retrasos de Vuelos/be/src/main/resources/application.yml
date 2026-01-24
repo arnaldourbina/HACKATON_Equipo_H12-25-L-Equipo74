@@ -3,4 +3,4 @@ server:
 
 ds:
   service:
-    url: http://localhost:5000/predict
+    url: http://localhost:5000

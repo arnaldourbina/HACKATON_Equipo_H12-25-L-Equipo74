@@ -2,14 +2,16 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
 import joblib
-import shap
 import uvicorn
+import numpy as np
 from pathlib import Path
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from dotenv import load_dotenv
 import os
+from catboost import Pool
+from scipy.special import expit
 
 # ---------------------------
 # 1. Definir app
@@ -39,9 +41,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 MODEL_DIR = BASE_DIR / "model"
 
 model = joblib.load(MODEL_DIR / "cat_model.joblib")
-
-# Cargar datos de fondo para SHAP explainer
-explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
 
 def enviar_alerta_retraso(to_email: str, vuelo_data: dict, probabilidad: float):
     
@@ -99,7 +98,7 @@ def root():
 def predict(flight: FlightInput):
     fecha = pd.to_datetime(flight.fecha_partida)
     hora_llegada = fecha.hour
-    llegada_programa = fecha.hour
+    llegada_programada = fecha.hour
 
     # Construir DataFrame de entrada para el modelo
     df = pd.DataFrame({
@@ -122,19 +121,41 @@ def predict(flight: FlightInput):
             "Tarde" if 12 <= hora_llegada < 18 else
             "Noche"
         ],
-        "LLEGADA_PROGRAMA": [llegada_programa],
+        "LLEGADA_PROGRAMA": [llegada_programada],
         "FRANJA_LLEGADA_PROGRAMA": [
-            "Madrugada" if 0 <= llegada_programa < 6 else
-            "Mañana" if 6 <= llegada_programa < 12 else
-            "Tarde" if 12 <= llegada_programa < 18 else
+            "Madrugada" if 0 <= llegada_programada < 6 else
+            "Mañana" if 6 <= llegada_programada < 12 else
+            "Tarde" if 12 <= llegada_programada < 18 else
             "Noche"
         ]
     })
 
-    proba = model.predict_proba(df)[:, 1][0]
+    categorical_features = [
+        "AEROLINEA","AEROPUERTO_ORIGEN","AEROPUERTO_DESTINO",
+        "MES","DIA","TEMPORADA","FRANJA_HORARIA_LLEGADA","FRANJA_LLEGADA_PROGRAMA"
+    ]
+    numeric_features = ["DISTANCIA","ANO","ES_FIN_DE_SEMANA","HORA_LLEGADA","LLEGADA_PROGRAMA"]
+
+    for col in categorical_features:
+        df[col] = df[col].astype(str).fillna("missing")
+
+    for col in numeric_features:
+        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(df[col].mean())
+
+    categorical_indices = [0, 1, 2, 5, 6, 8, 10, 12]
+
+    pool = Pool(
+        df.values.astype(object),
+        cat_features=categorical_indices
+    )
+
+    proba = model.predict_proba(pool)[:, 1][0]
 
     umbral = 0.30
     prevision = "Retrasado" if proba >= umbral else "Puntual"
+
+    print("=== INPUT DF PREDICT ===", df.to_dict(orient="records")[0])
+    print("Proba PREDICT:", proba)
 
     return {
         "prevision": prevision,
@@ -152,7 +173,7 @@ def enviar_alerta_vuelo(alert: FlightEmail):
 def explain(flight: FlightInput):
     fecha = pd.to_datetime(flight.fecha_partida)
     hora_llegada = fecha.hour
-    llegada_programa = fecha.hour
+    llegada_programada = fecha.hour
 
     df = pd.DataFrame({ 
         "AEROLINEA": [flight.aerolinea],
@@ -172,35 +193,51 @@ def explain(flight: FlightInput):
             "Mañana" if 6 <= hora_llegada < 12 else
             "Tarde" if 12 <= hora_llegada < 18 else "Noche"
         ],
-        "LLEGADA_PROGRAMA": [llegada_programa],
+        "LLEGADA_PROGRAMA": [llegada_programada],
         "FRANJA_LLEGADA_PROGRAMA": [
-            "Madrugada" if 0 <= llegada_programa < 6 else
-            "Mañana" if 6 <= llegada_programa < 12 else
-            "Tarde" if 12 <= llegada_programa < 18 else "Noche"
+            "Madrugada" if 0 <= llegada_programada < 6 else
+            "Mañana" if 6 <= llegada_programada < 12 else
+            "Tarde" if 12 <= llegada_programada < 18 else "Noche"
         ]
     })
 
+    categorical_indices = [0, 1, 2, 5, 6, 8, 10, 12]
+
     categorical_features = [
-        "AEROLINEA","AEROPUERTO_ORIGEN","AEROPUERTO_DESTINO",
-        "MES","DIA","TEMPORADA","FRANJA_HORARIA_LLEGADA","FRANJA_LLEGADA_PROGRAMA"
+    "AEROLINEA","AEROPUERTO_ORIGEN","AEROPUERTO_DESTINO",
+    "MES","DIA","TEMPORADA","FRANJA_HORARIA_LLEGADA","FRANJA_LLEGADA_PROGRAMA"
     ]
-    
-    # Limpieza si aplica
+    numeric_features = ["DISTANCIA","ANO","ES_FIN_DE_SEMANA","HORA_LLEGADA","LLEGADA_PROGRAMA"]
+
     for col in categorical_features:
         df[col] = df[col].astype(str).fillna("missing")
-    numeric_features = ["DISTANCIA","ANO","ES_FIN_DE_SEMANA","HORA_LLEGADA","LLEGADA_PROGRAMA"]
+
     for col in numeric_features:
         df[col] = pd.to_numeric(df[col], errors="coerce").fillna(df[col].mean())
 
-    valores_shap = explainer.shap_values(df)
-    proba = model.predict_proba(df)[:, 1][0]
+    pool = Pool(
+        df.values.astype(object),
+        cat_features=categorical_indices
+    )
 
+    proba = model.predict_proba(pool)[:, 1][0]
+
+    shap_values_full = model.get_feature_importance(
+        pool, type='ShapValues', thread_count=-1
+    )
+    shap_values = shap_values_full[0, :-1]
+    base_value = shap_values_full[0, -1]
+    raw_pred = base_value + shap_values.sum()
+
+    proba_from_shap = float(expit(raw_pred))
+    
     return {
-        "shap_values": valores_shap[0].tolist(), 
-        "base_value": float(explainer.expected_value),
+        "shap_values": shap_values.tolist(),
+        "base_value": float(base_value),
         "features": df.columns.tolist(),
-        "feature_values": df.iloc[0].astype(object).to_dict(),
-        "probabilidad": round(float(proba), 4)
+        "feature_values": df.to_dict(orient="records")[0],
+        "probabilidad": round(float(proba), 4),
+        "probabilidad_shap": round(proba_from_shap, 4), 
     }
 
 
