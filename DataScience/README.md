@@ -278,7 +278,7 @@ Cuando usar:
 **📈 Evaluación del modelo**
 
 - Se usó un umbral personalizado (0.7912) para ajustar la sensibilidad del modelo.
-- 
+ 
 Se reportaron métricas clave:
 
 - Precisión: 0.76 → mide cuántas predicciones positivas fueron correctas.
