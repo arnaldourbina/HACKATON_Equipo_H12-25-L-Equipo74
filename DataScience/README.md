@@ -114,7 +114,8 @@ El conjunto de datos incluye la siguiente información:
 
 5.- Análisis para reconocer las variables que influyen en los retrasos graves, para ello se realiza un gráfico de barra que se muestra a continuación:
 
-![Causa más común retraso](images/Causa_mas_comun_de_retraso.png)
+
+![Causa más común retraso](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/Causa_mas_comun_de_retraso.png)
 
 
 **- RETRASO_AVIÓN_TARDÍO** no es una causa primaria, sino más bien un efecto acumulado. Se refiere a los minutos de retraso que un vuelo hereda porque el avión llegó tarde de un vuelo anterior. Ese retraso puede estar explicado por cualquiera de las otras causas:
@@ -171,7 +172,7 @@ Creación del ensemble (promedio de probabilidades). Esto suaviza las diferencia
 **Rsultados otenidos:**
 Evaluación final con el umbral 0.6 (matriz de confusión + reporte).
 
-  ![Matriz_de_confusión](images/Matriz_de_confusion_final.png)
+![Matriz de confusión](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/Matriz_de_confusion_final.png)
 
 Métricas clave:
 
@@ -285,7 +286,7 @@ Se reportaron métricas clave:
 - F1 Score: 0.76 → balance entre precisión y recall.
 - ROC-AUC: 0.97 → mide la capacidad del modelo para distinguir entre clases.
   
-   ![Curva_ROC](images/Curva_ROC.png)
+![Curva ROC](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/Curva_ROC.png)
 
 **🔎 Conclusión técnica**
 
@@ -309,7 +310,7 @@ El modelo CatBoostClassifier fue seleccionado porque responde de manera óptima 
   
 - El ajuste de un umbral óptimo (0.7912) permitió balancear precisión y recall según las necesidades operativas.
 
-  ![Matriz_de_confusión](images/confusion_matrix.png)
+![Matriz de confusión](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/confusion_matrix.png)
   
   
 **RESUMEN DE LA CONCLUSIÓN**
@@ -333,7 +334,7 @@ Cada boxplot representa:
 - Puntos individuales: vuelos con retrasos extremos (outliers).
 
 
-![Distribución_retrasos_erolínea](images/Distribucion_de_retrasos_por_aerolinea.png)
+![Distribución retrasos aerolínea](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/Distribucion_de_retrasos_por_aerolinea.png)
 
 1. Aerolíneas con menor dispersión
 - AS (Alaska Airlines) y HA (Hawaiian Airlines) muestran cajas compactas y bajas medianas.
@@ -361,7 +362,7 @@ Cada boxplot representa:
 - Cada barra representa el porcentaje de vuelos en esa franja que sufrieron retrasos graves.
 
 
-![Proporción_retrasos_graves_por_franja_horaria](images/Proporcion_de_retrasos_graves_por_franja_horaria.png)
+![Proporción retrasos graves por franja horaria](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/Proporcion_de_retrasos_graves_por_franja_horaria.png)
 
 1. Madrugada (≈ 0.48)
 - Es la franja con mayor proporción de retrasos graves: casi el 48% de los vuelos que llegan en esta franja sufren retrasos significativos.
@@ -386,7 +387,7 @@ Esto sugiere que:
 - Eje Y: proporción de vuelos con retraso grave (mayor o igual a 30 minutos), expresada como valor entre 0 y 1.
 - Cada barra representa el porcentaje de vuelos en esa estación que sufrieron retrasos significativos
 
-![Proporción_retrasos_graves_por_temporada_horaria](images/Proporcion_de_retrasos_graves_por_temporada.png)
+![Proporción retrasos graves por temporada horaria](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/Proporcion_de_retrasos_graves_por_temporada.png)
   
 🔍 Análisis comparativo
 1. Verano y Otoño (≈ 0.11–0.12)
@@ -408,7 +409,7 @@ Posibles causas:
 - Eje Y: proporción de vuelos con retraso grave (mayor a 30 minutos), expresada como valor entre 0 y 1.
 - Cada barra representa el porcentaje de vuelos en ese día que sufrieron retrasos graves.
 
-![Proporción_retrasos_graves_por_día](images/Proporcion_de_retrasos_graves_por_dia.png)
+![Proporción retrasos graves por día](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/Proporcion_de_retrasos_graves_por_dia.png)
 
 🔍 Análisis interpretativo
 1. Distribución uniforme
