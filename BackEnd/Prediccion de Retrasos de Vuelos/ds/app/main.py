@@ -1,13 +1,20 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import pandas as pd
 import joblib
 import shap
 import uvicorn
 from pathlib import Path
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from dotenv import load_dotenv
+import os
+
 # ---------------------------
 # 1. Definir app
 # ---------------------------
+load_dotenv()
 app = FastAPI()
 
 # ---------------------------
@@ -20,6 +27,11 @@ class FlightInput(BaseModel):
     fecha_partida: str
     distancia_km: float
 
+class FlightEmail(BaseModel):
+    to_email: str
+    vuelo_data: dict
+    probabilidad: float
+
 # ---------------------------
 # 3. Cargar modelo CatBoost
 # ---------------------------
@@ -30,6 +42,51 @@ model = joblib.load(MODEL_DIR / "cat_model.joblib")
 
 # Cargar datos de fondo para SHAP explainer
 explainer = shap.TreeExplainer(model, feature_perturbation="tree_path_dependent")
+
+def enviar_alerta_retraso(to_email: str, vuelo_data: dict, probabilidad: float):
+    
+    sender_email = os.getenv("EMAIL_USER")
+    sender_password = os.getenv("EMAIL_PASS")
+    
+    if not sender_email or not sender_password:
+        return {"error": "Config email no disponible"}
+    
+    html_content = f"""
+    <html>
+    <body style="font-family: Arial; max-width: 600px; margin: 0; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; text-align: center;">
+            <h1 style="color: white; margin: 0;">🚨 Alerta FlightOnTime</h1>
+        </div>
+        <div style="padding: 20px;">
+            <h2 style="color: #d32f2f;">🛑 Vuelo con Riesgo de Retraso Mayor a 30 minutos.</h2>
+            <table style="border-collapse: collapse; width: 100%; margin: 20px 0;">
+                <tr style="background: #f5f5f5;"><td style="padding: 12px;"><strong>Aerolínea:</strong></td><td style="padding: 12px;">{vuelo_data['aerolinea']}</td></tr>
+                <tr><td style="padding: 12px;"><strong>Ruta:</strong></td><td style="padding: 12px;">{vuelo_data['origen']} → {vuelo_data['destino']}</td></tr>
+                <tr style="background: #ff6b6b;"><td style="padding: 12px;"><strong>Probabilidad Retraso:</strong></td><td style="padding: 12px;"><strong style="color: #d32f2f; font-size: 24px;">{probabilidad:.1%}</strong></td></tr>
+            </table>
+            <p><em>Recomendación: Llega con tiempo de antelación, considera vuelo alternativo o comunicate con tu aerolínea para mas detalles.</em></p>
+            <hr style="border: 1px solid #eee;">
+            <small>FlightOnTime - Hackathon ONE II | H12-25-L-Equipo74</small>
+        </div>
+    </body>
+    </html>
+    """
+    
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = sender_email
+        msg['To'] = to_email
+        msg['Subject'] = f"🚨 {vuelo_data['aerolinea']} {vuelo_data['origen']}→{vuelo_data['destino']} - Riesgo Retraso {probabilidad:.0%}"
+        
+        msg.attach(MIMEText(html_content, 'html'))
+        
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+            server.login(sender_email, sender_password)
+            server.send_message(msg)
+        
+        return {"status": "Email enviado ✅"}
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.get("/")
 def root():
@@ -83,6 +140,13 @@ def predict(flight: FlightInput):
         "prevision": prevision,
         "probabilidad": round(float(proba), 2)
     }
+
+@app.post("/send-alert")
+def enviar_alerta_vuelo(alert: FlightEmail):
+    result = enviar_alerta_retraso(alert.to_email, alert.vuelo_data, alert.probabilidad)
+    if "error" in result:
+        raise HTTPException(500, result["error"])
+    return result
 
 @app.post("/explain")
 def explain(flight: FlightInput):

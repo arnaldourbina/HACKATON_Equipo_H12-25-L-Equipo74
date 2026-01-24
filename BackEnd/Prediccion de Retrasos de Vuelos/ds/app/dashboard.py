@@ -1,4 +1,3 @@
-from io import BytesIO
 import streamlit as st
 import requests
 import pandas as pd
@@ -11,7 +10,8 @@ import time
 from datetime import datetime, date
 
 # Config
-API_URL = "http://localhost:8080/api/predict" 
+API_URL = "http://localhost:8080/api/predict"
+FASTAPI_URL = "http://localhost:5000"
 RECENTS_MAX = 20
 
 with open("styles.css", "r") as css_file:
@@ -138,8 +138,14 @@ distancia_km = st.sidebar.number_input(
     help="Ingresa la distancia entre aeropuertos"
 )
 
+email_usuario = st.sidebar.text_input(
+    "📧 Email para alertas (opcional)", 
+    placeholder="tucorreo@gmail.com",
+    help="Ingresa tu correo y recibe una notificación si el retraso es mayor a 30min"
+)
+
 # Predict
-if st.sidebar.button("Predecir Retraso", type="primary", use_container_width=True):
+if st.sidebar.button("Predecir Retraso", type="primary", width='stretch'):
     fecha_iso = f"{fecha_partida}T{hora_partida.strftime('%H:%M:%S')}"
     
     payload = {
@@ -204,6 +210,36 @@ if st.sidebar.button("Predecir Retraso", type="primary", use_container_width=Tru
         st.sidebar.markdown("### **Resultado**")
         st.sidebar.metric("Predicción", result['prevision'], delta=None)
         st.sidebar.metric("Prob. Retraso", f"{result['probabilidad']:.1%}", delta=None)
+
+        if result['probabilidad'] > 0.30 and email_usuario:
+            with st.spinner("📤 Enviando alerta por email..."):
+                alert_payload = {
+                    "to_email": email_usuario,
+                    "vuelo_data": {
+                        "aerolinea": aerolinea_seleccionada,
+                        "origen": origen,
+                        "destino": destino,
+                        "fecha_partida": fecha_iso,
+                        "distancia_km": distancia_km
+                    },
+                    "probabilidad": result['probabilidad']
+                }
+                
+                alert_response = requests.post(
+                    f"{FASTAPI_URL}/send-alert", 
+                    json=alert_payload, 
+                    timeout=10
+                )
+                
+                if alert_response.status_code == 200:
+                    st.balloons()
+                    st.success(f"✅ ¡Alerta enviada a {email_usuario}! 📧")
+                else:
+                    st.warning("⚠️ Error al enviar el email")
+        else:
+            if result['probabilidad'] <= 0.30:
+                st.info("Probabilidad de retraso baja, no es necesario enviar una alerta.")
+            
     
     except Exception as e:
         progress_bar.empty()
@@ -230,14 +266,14 @@ if uploaded_file is not None:
     col_btn1, col_btn2 = st.sidebar.columns(2)
     with col_btn1:
         if st.button("**Vista Previa**", type="secondary"):
-            st.sidebar.dataframe(df_preview.head(), use_container_width=True)
+            st.sidebar.dataframe(df_preview.head(), width='stretch')
     with col_btn2:
         if st.button("**Predecir Lote**", type="primary"):
             with st.spinner("Procesando lote..."):
                 try:
                     files = {'file': (uploaded_file.name, uploaded_file.getvalue(), 'text/csv')}
                     response = requests.post(
-                        "http://localhost:8080/api/predict/batch",
+                        f"{API_URL}/batch",
                         files=files,
                         timeout=30
                     )
@@ -248,7 +284,7 @@ if uploaded_file is not None:
                         data=response.content,
                         file_name=f"archivo_con_{len(df_preview)}_vuelos_predichos.csv",
                         mime="text/csv",
-                        use_container_width=True
+                        width='stretch'
                     )
                     st.sidebar.success(f"**¡{len(df_preview)} predicciones listas!**")
                 except Exception as e:
@@ -285,7 +321,7 @@ with col_a:
         st.dataframe(
             df[['timestamp', 'aerolinea', 'origen_destino', 'prevision', 'probabilidad']]
             .style.format({'probabilidad': '{:.1%}'}),
-            use_container_width=True
+            width='stretch'
         )
         
         df_plot = df.tail(20).copy()
@@ -301,7 +337,7 @@ with col_a:
             height=300
         )
         fig.update_xaxes(title="Reciente ←")
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width='stretch')
         
         retrasos_pct = (df['prevision'] == 'Retraso').mean() * 100
 
@@ -349,7 +385,7 @@ seleccion = st.selectbox(
         format_func=lambda x: f"{x['timestamp']} | {x['aerolinea']} {x['origen']}→{x['destino']} ({x['prevision']} {float(x['probabilidad']):.0%})"
     )
         
-if st.button("🔍 Explicar vuelo seleccionado", type="primary", use_container_width=True):
+if st.button("🔍 Explicar vuelo seleccionado", type="primary", width='stretch'):
             with st.spinner("Generando explicación SHAP..."):
 
                 payload = {
@@ -377,28 +413,31 @@ if st.button("🔍 Explicar vuelo seleccionado", type="primary", use_container_w
                         sorted_shap = shap_vals[sorted_idx]
                         sorted_features = [features[i] for i in sorted_idx]
                         
-                        fig_water, ax = plt.subplots(figsize=(10, 5))
-                        colors = ['red' if x < 0 else 'green' for x in sorted_shap]
+                        fig_water, ax = plt.subplots(figsize=(12, 6))
+                        colors = ['green' if x < 0 else 'red' for x in sorted_shap]
                         y_pos = np.arange(len(sorted_features))
-                        ax.barh(y_pos, sorted_shap, color=colors, alpha=0.7)
-                        ax.axvline(x=base_value, color='black', linestyle='--', label=f'Base: {base_value:.2f}')
+                        bars = ax.barh(y_pos, sorted_shap, color=colors, alpha=0.8, edgecolor='black', linewidth=0.5)
+                        for i, (bar, shap_val) in enumerate(zip(bars, sorted_shap)):
+                            width = bar.get_width()
+                            ax.text(width + 0.005 * np.sign(width), bar.get_y() + bar.get_height()/2,
+                                    f'{shap_val:.3f}', ha='left' if width >= 0 else 'right',
+                                    va='center', fontweight='bold', fontsize=10, color='black')
+                        ax.axvline(x=base_value, color='orange', linestyle='--', linewidth=2, label=f'Base value: {base_value:.3f}')
                         ax.set_yticks(y_pos)
-                        ax.set_yticklabels(sorted_features)
-                        ax.set_xlabel("Impacto en Probabilidad")
+                        ax.set_yticklabels(sorted_features, fontsize=11, fontweight='bold')
+                        ax.set_title("Explicación de la decisión del modelo.", fontsize=14, fontweight='bold', pad=20)
+                        ax.set_xlabel("Impacto de features en Prob. Retraso", fontsize=12, fontweight='bold')
+                        ax.text(0.5, -0.20, 
+                        'VERDE disminuye prob. restraso | ROJO aumenta prob. retraso', 
+                        transform=ax.transAxes, ha='center', va='bottom',
+                        fontsize=11, fontweight='bold', 
+                        bbox=dict(boxstyle='round,pad=0.4', facecolor='#FFF3CD', edgecolor='#FFA500', alpha=0.95))
+                        ax.legend(loc='upper right')
+                        ax.grid(axis='x', alpha=0.3)
+                        ax.margins(y=0.02)
+                        plt.tight_layout()
                         st.pyplot(fig_water)
                         plt.close()
-
-                        st.subheader("Tabla de valores que afectan a la predicción del vuelo:")
-                        df_valores = pd.DataFrame({
-                            'Feature': features,
-                            'Valor': feature_values_str,
-                            'SHAP': [f"{v:.3f}" for v in shap_vals]
-                        })
-                        
-                        st.dataframe(
-                            df_valores.style.background_gradient(subset=['SHAP'], cmap='RdYlGn_r'),
-                            use_container_width=True
-                        )
                         
                     else:
                         st.error(f"Error SHAP API: {response.text}")
