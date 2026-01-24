@@ -13,8 +13,13 @@
 *.parquet
 *.xlsx
 
+# Secrets
+ds/app/.env
+.env
+
 # Entornos virtuales y Python
 venv310/
+venv/
 __pycache__/
 .ipynb_checkpoints/
 
