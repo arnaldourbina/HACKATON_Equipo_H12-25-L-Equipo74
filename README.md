@@ -382,7 +382,8 @@ Ejecuta el siguiente comando para instalar las bibliotecas necesarias:
 pip install pandas numpy matplotlib
 
 🚀 Instrucciones para Ejecutar
-Clona este repositorio en tu máquina local: ´´´bash git clone https://github.com/Marion13673/Analisis-ventas-por-tienda.git
+Clona este repositorio en tu máquina local: ´´´bash git clone 
+https://github.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74.git
 
 Abre el archivo index.html en tu navegador para ver y usar la aplicación.
 
