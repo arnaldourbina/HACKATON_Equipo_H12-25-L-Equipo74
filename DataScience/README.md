@@ -453,7 +453,7 @@ pip install pandas numpy matplotlib
 # 🚀 Instrucciones para Ejecutar
 
 Clona este repositorio en tu máquina local: ´´´bash
-git clone https://github.com/Marion13673/Analisis-ventas-por-tienda.git
+git clone https://github.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74.git
 
 Abre el archivo index.html en tu navegador para ver y usar la aplicación.
 
@@ -461,15 +461,15 @@ Abre el archivo index.html en tu navegador para ver y usar la aplicación.
 
 💡 ¡Las contribuciones son bienvenidas! Si deseas contribuir a este proyecto, por favor sigue estos pasos:
 
-**Haz un fork del repositorio.**
+1. Haz un fork del repositorio.
 
-Crea una rama con tu nueva característica (git checkout -b feature/nueva-caracteristica).
+2. Crea una rama con tu nueva característica (git checkout -b feature/nueva-caracteristica).
 
-Realiza tus cambios y haz un commit (git commit -m 'Añadir nueva característica').
+3. Realiza tus cambios y haz un commit (git commit -m 'Añadir nueva característica').
 
-Envía tu rama al repositorio remoto (git push origin feature/nueva-caracteristica).
+4. Envía tu rama al repositorio remoto (git push origin feature/nueva-caracteristica).
 
-Abre una Pull Request.
+5 Abre una Pull Request.
 
 # 📜 Licencia
 
