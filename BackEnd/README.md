@@ -437,6 +437,7 @@ Maneja variables categóricas de forma nativa (`cat_features`), sin necesidad de
  [  29915  100206]]
 ````
 ![Matriz de Confusión](images/confusion_matrix.png)
+![Matriz de Confusión](https://raw.githubusercontent.com/arnaldourbina/HACKATON_Equipo_H12-25-L-Equipo74/main/images/confusion_matrix.png)
 
 --- 
 ## 📂 Dataset utilizado
