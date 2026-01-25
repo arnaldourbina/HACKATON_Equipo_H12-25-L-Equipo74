@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field, field_validator
 import pandas as pd
 import joblib
 import uvicorn
@@ -23,12 +23,51 @@ app = FastAPI()
 # 2. Definir input simplificado
 # ---------------------------
 class FlightInput(BaseModel):
-    aerolinea: str
-    origen: str
-    destino: str
-    fecha_partida: str
-    distancia_km: float
+    aerolinea: str = Field(..., min_length=1, description="Nombre de la aerolínea (obligatorio)")
+    origen: str = Field(..., min_length=1, description="Código aeropuerto origen (obligatorio)")
+    destino: str = Field(..., min_length=1, description="Código aeropuerto destino (obligatorio)")
+    fecha_partida: str = Field(..., min_length=1, description="Fecha partida YYYY-MM-DD (obligatorio)")
+    distancia_km: float = Field(..., gt=0, description="Distancia en km (obligatorio, > 0)")
 
+    @field_validator('aerolinea')
+    @classmethod
+    def validate_aerolinea(cls, v):
+        if not v or not v.strip():
+            raise ValueError('La aerolínea es obligatoria')
+        return v.strip()
+
+    @field_validator('origen')
+    @classmethod
+    def validate_origen(cls, v):
+        if not v or not v.strip():
+            raise ValueError('El aeropuerto de origen es obligatorio')
+        return v.strip()
+
+    @field_validator('destino')
+    @classmethod
+    def validate_destino(cls, v):
+        if not v or not v.strip():
+            raise ValueError('El aeropuerto destino es obligatorio')
+        return v.strip()
+
+    @field_validator('fecha_partida')
+    @classmethod
+    def validate_fecha(cls, v):
+        if not v or not v.strip():
+            raise ValueError('La fecha de partida es obligatoria')
+        try:
+            pd.to_datetime(v)
+        except:
+            raise ValueError('Fecha inválida. Use YYYY-MM-DD')
+        return v
+
+    @field_validator('distancia_km')
+    @classmethod
+    def validate_distancia(cls, v):
+        if v <= 0:
+            raise ValueError('❌ La distancia debe ser mayor a 0 km')
+        return v
+    
 class FlightEmail(BaseModel):
     to_email: str
     vuelo_data: dict
@@ -151,7 +190,7 @@ def predict(flight: FlightInput):
 
     proba = model.predict_proba(pool)[:, 1][0]
 
-    umbral = 0.30
+    umbral = 0.7912
     prevision = "Retrasado" if proba >= umbral else "Puntual"
 
     print("=== INPUT DF PREDICT ===", df.to_dict(orient="records")[0])

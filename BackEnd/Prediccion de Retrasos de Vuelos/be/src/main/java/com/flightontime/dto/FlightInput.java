@@ -5,23 +5,23 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class FlightInput {
-    @NotBlank(message = "Aerolinea requerida")
+    @NotBlank(message = "Aerolinea no puede estar vacía")
     @JsonProperty("aerolinea")
     public String aerolinea;
 
-    @NotBlank(message = "Origen requerido")
+    @NotBlank(message = "Origen no puede estar vacío")
     @JsonProperty("origen")
     public String origen;
 
-    @NotBlank(message = "Destino requerido")
+    @NotBlank(message = "Destino no puede estar vacío")
     @JsonProperty("destino")
     public String destino;
 
-    @NotNull(message = "Fecha partida requerida")
+    @NotNull(message = "Fecha no puede estar vacía")
     @JsonProperty("fecha_partida")
     public String fecha_partida;
 
-    @NotNull(message = "Distancia requerida")
+    @NotNull(message = "Distancia no puede estar vacía")
     @JsonProperty("distancia_km")
     public Integer distancia_km;
 
