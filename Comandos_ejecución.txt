@@ -94,20 +94,6 @@ Retrasado:
   "destino": "STL",
   "fecha_partida": "2026-6-15T4:50:00",
   "distancia_km": 885
-}. Respuesta: {
-  "prevision": "Retrasado",
-  "probabilidad": 0.805
-  }
- 
-{
-  "aerolinea": "LATAM",
-  "origen": "DFW",
-  "destino": "STL",
-  "fecha_partida": "2026-6-15T4:50:00",
-  "distancia_km": 885
-} Respuesta: {
-  "prevision": "Puntual",
-  "probabilidad": 0.713
 }
 
 Puntual:
@@ -119,5 +105,17 @@ Puntual:
     "fecha_partida": "2026-01-12T15:00:00",
     "distancia_km": 8200
 }
+
+{
+  "aerolinea": "LATAM",
+  "origen": "DFW",
+  "destino": "STL",
+  "fecha_partida": "2026-6-15T4:50:00",
+  "distancia_km": 885
+} Respuesta: {
+  "prevision": "Puntual",
+  "probabilidad": 0.713
+}
+
 
 Con error:
