@@ -30,76 +30,57 @@ Prediccion-de-Retrasos-de-Vuelos/
 │   ├── src/
 │   │   ├── main/
 │   │   │   ├── java/com/flightontime/
+│   │   │   │   ├── config/
+│   │   │   │   │   ├── RestTemplateConfig.java
 │   │   │   │   ├── controller/
-│   │   │   │   │   ├── RootController.java
 │   │   │   │   │   ├── PredictController.java
-│   │   │   │   │   ├── StatsController.java
-│   │   │   │   │   └── WebController.java
 │   │   │   │   ├── dto/
+│   │   │   │   │   ├── ExplainOutput.java
+│   │   │   │   │   └── FlightEmail.java
 │   │   │   │   │   ├── FlightInput.java
 │   │   │   │   │   └── PredictionOutput.java
+│   │   │   │   │   ├── StatsDto.java
+│   │   │   │   ├── entity/
+│   │   │   │   │   ├── H2Prediction.java
 │   │   │   │   ├── exception/
 │   │   │   │   │   └── GlobalExceptionHandler.java
+│   │   │   │   ├── repository/
+│   │   │   │   │   └── H2PredictionRepository.java
 │   │   │   │   ├── service/
-│   │   │   │   │   └── DsClient.java
+│   │   │   │   │   └── DsClientService.java
+│   │   │   │   │   └── H2PredictionService.java
+│   │   │   │   │   └── H2StatsService.java
+│   │   │   │   ├── util/
+│   │   │   │   │   └── CSVAnalisisVuelos.java
 │   │   │   │   └── FlightOnTimeApplication.java
 │   │   │   └── resources/
 │   │   │       ├── application.yml
+│   │   │       ├── application.properties
 │   │   │       └── templates/
 │   │   │           ├── form.html
 │   │   │           └── result.html
-│   └── target/
-│       ├── classes/
-│       │   ├── application.yml
-│       │   ├── com/flightontime/
-│       │   │   ├── controller/
-|       |   |   |   |__ ApiRootController.class
-|       |   |   |   |__ RootController.class
-│       │   │   │   ├── PredictController.class
-│       │   │   │   ├── StatsController.class
-│       │   │   │   └── WebController.class
-│       │   │   ├── dto/
-│       │   │   │   ├── FlightInput.class
-│       │   │   │   └── PredictionOutput.class
-│       │   │   ├── exception/
-│       │   │   │   └── GlobalExceptionHandler.class
-│       │   │   ├── service/
-│       │   │   │   └── DsClient.class
-│       │   │   └── FlightOnTimeApplication.class
-│       │   └── templates/
-│       │       ├── form.html
-│       │       └── result.html
-│       ├── generated-sources/
-│       │   └── annotations/
-│       └── maven-status/
-│           └── maven-compiler-plugin/
-│               └── compile/
-│                   └── default-compile/
-│                       ├── createdFiles.lst
-│                       └── inputFiles.lst
 ├── ds/                          # Data Science / Machine Learning
 │   ├── app/
 │   │   ├── dashboard.py
+│   │   ├── requiremets.txt
 │   │   └── main.py
 │   ├── data/
 │   │   └── flight_clean.csv
 │   ├── model/
 │   │   └── cat_model.joblib
-|   |   └── catoost_learning_curve.png
-│   ├── notebooks/
-|   |   └── notebook_flight_on_time.ipynb
-|   |__ scripts/
-|   |   └── entrenar.py
-|   |   └── test_model.py
-|   |__ service
-|   |    └── init.py
-|   |    └── predictor_service.py 
-|   |__ venv310/
-|   |__ init.py
-|   |__ modelos_retraso.py
+│   │   ├── catboost_learning_curve.png
+│   │   ├── xgb_model.txt
+│   ├── service/
+│   │   └── predictorService.py
+│   │   ├── __init__.py
+│   ├── modelos_retraso.py
 │   └── requirements.txt
-├── README.md                    # Documentación del proyecto
-└── .gitignore                   # Archivos ignorados por Git
+├── entrenar.py                  
+├── testmodel.py
+├── notebook_flight_on_time.ipynb
+├── curva_aprendizaje_catboost.png
+├── Manual_de_usuario - FoT Dashboard.pdf                   
+└── README.md
 ````
 ---
 ## 🔎 Explicación:
