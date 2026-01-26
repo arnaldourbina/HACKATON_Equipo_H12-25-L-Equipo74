@@ -143,7 +143,7 @@ python entrenar.py
 
 model/cat_model.joblib
 
-**Ejecutar el backend**
+**Ejecutar el backend JAVA**
 
 ```bash
 cd be
@@ -151,7 +151,7 @@ mvn clean compile
 mvn spring-boot:run
 ````
 
-**El servidor se levanta en:**
+**El servidor JAVA se levanta en:**
 
 - **http://localhost:8080/api/predict**
 
@@ -161,12 +161,16 @@ cd ../ds
 python app/main.py
 ````
 
+**El servidor Uvicorn se levanta en:**
+
+- **http://localhost:5000/predict**
+
 **Ejecutar Dashboard streamlit**
 ```bash
 ../ds/app
 streamlit run dashboard.py
 ````
-**El servidor se levanta en:**
+**El servidor streamlit se levanta en:**
 
 - **http://localhost:8501**
 
