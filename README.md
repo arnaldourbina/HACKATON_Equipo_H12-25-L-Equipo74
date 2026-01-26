@@ -175,19 +175,17 @@ streamlit run dashboard.py
 - **http://localhost:8501**
 
 ## 📑 EndPoints
-API Endpoints y Web Services
-Java Backend (Port 8080)
-POST /api/predict - SPrediccion de vuelo.
-POST /api/predict/batch - prediccion en lote de archivos CSV.
-GET /api/stats - Obtiene estadisticas de los vuelos.
-GET /api/history - Obtiene el historial de los vuelos.
-Python ML Service (Port 5000)
-POST /predict - Prediccion de vuelos del modelo de ML.
-POST /explain - Explicacion SHAP de la decisión del modelo de ML.
-Streamlit Dashboard (Port 8501)
-Frontend interactivo para predicciones, prediccion en lotes, estadisticas y explicaciones SHAP.
-
-**📑 Endpoints**
+- API Endpoints y Web Services
+- Java Backend (Port 8080)
+- POST /api/predict - Prediccion de vuelo.
+- POST /api/predict/batch - prediccion en lote de archivos CSV.
+- GET /api/stats - Obtiene estadisticas de los vuelos.
+- GET /api/history - Obtiene el historial de los vuelos.
+- Python ML Service (Port 5000)
+- POST /predict - Prediccion de vuelos del modelo de ML.
+- POST /explain - Explicacion SHAP de la decisión del modelo de ML.
+- Streamlit Dashboard (Port 8501)
+- Frontend interactivo para predicciones, prediccion en lotes, estadisticas y explicaciones SHAP.
 
 {
   "aerolinea": "AA",
