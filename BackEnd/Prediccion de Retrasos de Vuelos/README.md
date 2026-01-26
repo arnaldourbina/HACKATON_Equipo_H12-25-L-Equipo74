@@ -4,7 +4,8 @@
 Este módulo contiene el backend del sistema de predicción de retrasos de vuelos.  
 Aquí se encuentran los archivos generados por CatBoost y el manual de usuario.
 
-📘 [Manual de Usuario](Manual%20de%20Usuario.pdf)
+📘 [Manual_de_usuario - FoT Dashboard](Manual_de_usuario%20-%20FoT%20Dashboard.pdf)
+
 
 ## Carpetas principales
 - `be/` → Archivos binarios del modelo.  
