@@ -15,3 +15,5 @@
 *.parquet filter=lfs diff=lfs merge=lfs
 *.xlsx filter=lfs diff=lfs merge=lfs
 flights2015.parquet filter=lfs diff=lfs merge=lfs -text
+csv,parquet filter=lfs diff=lfs merge=lfs -text
+flight_clean.csv filter=lfs diff=lfs merge=lfs -text
